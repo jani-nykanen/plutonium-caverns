@@ -17,4 +17,7 @@ void app_add_scene(Scene s, bool makeActive);
 // Run
 void app_run();
 
+// Terminate
+void app_terminate();
+
 #endif // __APP_CORE__

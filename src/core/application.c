@@ -7,6 +7,7 @@
 #include "err.h"
 #include "graphics.h"
 #include "input.h"
+#include "assets.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,6 +57,7 @@ int16 init_application() {
         return 1;
     }
     init_input();
+    init_assets();
 
     // Set defaults params
     frameSkip = 1;
@@ -139,3 +141,10 @@ void app_run() {
         printf("ERROR: %s\n", get_error());
     }
 }
+
+
+// Terminate
+void app_terminate() {
+
+    running = false;
+}   

@@ -6,6 +6,8 @@
 
 #include "scenes/game/game.h"
 
+#include <stdio.h>
+
 
 // Main function
 void main() {

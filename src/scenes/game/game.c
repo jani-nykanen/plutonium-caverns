@@ -7,6 +7,9 @@
 #include <stdlib.h>
 
 #include "../../core/graphics.h"
+#include "../../core/input.h"
+#include "../../core/application.h"
+#include "../../core/assets.h"
 
 // Game scene name
 static const char* GAME_SCENE_NAME = "game";
@@ -15,12 +18,17 @@ static const char* GAME_SCENE_NAME = "game";
 static Bitmap* bmpFont;
 
 
-
 // Initialize
 static int16 game_init() {
 
-    // Load font
-    bmpFont = load_bitmap("ASSETS/BITMAPS/FONT.BIN");
+    // Load bitmaps
+    if(!ass_add_bitmap("ASSETS/BITMAPS/FONT.BIN", "font")) {
+
+        return 1;
+    }
+
+    // Get font bimtpa
+    bmpFont = (Bitmap*)get_asset("font");
 
     return 0;
 }
@@ -29,7 +37,11 @@ static int16 game_init() {
 // Update
 static void game_update(int16 steps) {
 
-    // ...
+    // Quit
+    if(input_get_key(1) == Pressed) {
+
+        app_terminate();
+    }
 }
 
 

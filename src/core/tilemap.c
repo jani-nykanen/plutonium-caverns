@@ -10,7 +10,7 @@
 
 
 // Load a tilemap
-Tilemap* loadTilemap(const char* path) {
+Tilemap* load_tilemap(const char* path) {
 
     Tilemap* t;
     FILE* f;
@@ -67,7 +67,7 @@ Tilemap* loadTilemap(const char* path) {
 
 
 // Get a tile
-uint8 mapGetTile(Tilemap* t, uint8 layer, int16 x, int16 y) {
+uint8 map_get_tile(Tilemap* t, uint8 layer, int16 x, int16 y) {
 
     if(t == NULL) return 0;
 
@@ -82,7 +82,7 @@ uint8 mapGetTile(Tilemap* t, uint8 layer, int16 x, int16 y) {
 
 
 // Destroy a tilemap
-void destroyTilemap(Tilemap* t) {
+void destroy_tilemap(Tilemap* t) {
 
     uint8 i = 0;
     if(t == NULL) return;
