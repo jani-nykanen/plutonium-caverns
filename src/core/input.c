@@ -15,6 +15,8 @@
 
 // Key buffer size
 #define KEY_BUFFER_SIZE 0x60
+// Maximum amount of "buttons"
+#define MAX_BUTTONS 8
 
 // Arrow keycodes
 static const short ARROW_KEY_CODES[] = {
@@ -37,6 +39,9 @@ static bool extRead[KEY_BUFFER_SIZE];
 
 // Handlers
 static void far interrupt (*oldHandler)(void);
+
+// "Buttons"
+static int16 buttons [MAX_BUTTONS];
 
 
 // Keyboard interruption
@@ -121,6 +126,10 @@ void init_input() {
         normalRead[i] = false;
         extRead[i] = false;
     }
+    for(i=0; i < MAX_BUTTONS; ++ i) {
+
+        buttons[i] = 0;
+    }
 
     // Hook handlers
     oldHandler = _dos_getvect(0x09);
@@ -159,4 +168,24 @@ int16 input_get_arrow_key(int16 id) {
     return get_value_from_array(
         extKeys, 
         extRead, ARROW_KEY_CODES[id]);
+}
+
+
+// Add a "button"
+void input_add_button(int16 index, int16 key) {
+
+    if(index < 0 || index >= MAX_BUTTONS) 
+        return;
+        
+    buttons[index] = key;
+}
+
+
+// Get a "button" state
+int16 input_get_button(int16 id) {
+
+    if(id < 0 || id >= MAX_BUTTONS) 
+        return Up;
+
+    return input_get_key(buttons[id]);
 }

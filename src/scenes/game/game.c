@@ -38,7 +38,7 @@ static int16 game_init() {
 static void game_update(int16 steps) {
 
     // Quit
-    if(input_get_key(1) == Pressed) {
+    if(input_get_button(4) == Pressed) {
 
         app_terminate();
     }
