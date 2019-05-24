@@ -6,6 +6,9 @@
 
 #include <stdbool.h>
 
+// Error macros
+#define THROW_MALLOC_ERR err_throw_no_param("Memory allocation error.")
+
 #define ERR_MAX_LENGTH 128
 
 // Initialize error handling

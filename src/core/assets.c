@@ -13,6 +13,25 @@
 
 // Maximum asset count
 #define MAX_ASSETS 32
+// Asset name length
+#define ASSET_NAME_LENGTH 16
+
+// Asset type
+enum {
+
+    TypeBitmap = 0,
+    TypeTilemap = 1,
+};
+
+// Asset container
+typedef struct {
+
+    void* pointer;
+    char name [ASSET_NAME_LENGTH];
+    int16 type;
+    bool isEmpty;
+
+} Asset;
 
 // Asset buffer
 static Asset assBuffer [MAX_ASSETS];

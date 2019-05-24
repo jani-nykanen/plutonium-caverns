@@ -11,24 +11,49 @@
 #include "../../core/application.h"
 #include "../../core/assets.h"
 
+#include "stage.h"
+
 // Game scene name
 static const char* GAME_SCENE_NAME = "game";
 
 // Test bitmap
 static Bitmap* bmpFont;
 
+// Game components
+static Stage* stage;
+
 
 // Initialize
 static int16 game_init() {
 
     // Load bitmaps
-    if(!ass_add_bitmap("ASSETS/BITMAPS/FONT.BIN", "font")) {
+    if(
+        BITMAP("ASSETS/BITMAPS/FONT.BIN", "font") ||
+        BITMAP("ASSETS/BITMAPS/FRAME.BIN", "frame") ||
+        BITMAP("ASSETS/BITMAPS/TILESET.BIN", "tileset") ||
+        BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||
+        BITMAP("ASSETS/BITMAPS/ITEMS.BIN", "items") ||
+        BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player")
+    ) {
 
         return 1;
     }
 
-    // Get font bimtpa
+    // Get font bitmap
     bmpFont = (Bitmap*)get_asset("font");
+
+    // Create main components
+    stage = create_stage();
+    if(stage == NULL) {
+
+        return 1;
+    }
+
+    // Initialize components
+    if(stage_init(stage, "ASSETS/MAPS/0.BIN") == 1) {
+
+        return 1;
+    }
 
     return 0;
 }
@@ -37,20 +62,22 @@ static int16 game_init() {
 // Update
 static void game_update(int16 steps) {
 
-    // Quit
+    // Quit (TEMPORARY!)
     if(input_get_button(4) == Pressed) {
 
         app_terminate();
     }
+
+    // Update stage
+    stage_update(stage, steps);
 }
 
 
 // Draw 
 static void game_draw() {
 
-    clear_screen(170);
-
-    draw_text_fast(bmpFont, "HELLO WORLD!", 8, 8, 0, 0, false);
+    // Draw stage
+    stage_draw(stage);
 }
 
 
