@@ -11,7 +11,7 @@
 
 
 // Create a bitmap
-Bitmap* create_bitmap(uint16 w, uint16 h, uint8* data) {
+Bitmap* create_bitmap(uint8 w, uint8 h, uint8* data) {
 
     uint16 i = 0;
 
@@ -65,7 +65,7 @@ Bitmap* load_bitmap(const char* path) {
     fread(&h, sizeof(uint16), 1, f);
 
     // Allocate memory
-    bmp = create_bitmap(w, h, NULL);
+    bmp = create_bitmap((uint8)w, (uint8)h, NULL);
     if(bmp == NULL) {
 
         err_throw_no_param("Failed to create a bitmap!");

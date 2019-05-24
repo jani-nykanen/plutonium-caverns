@@ -8,10 +8,11 @@
 #include "../../core/assets.h"
 
 #include <stdlib.h>
-
+#include <stdio.h>
 
 // Draw frame
-static void draw_box_frame(Bitmap* bmp, int dx, int dy, int w, int h) {
+static void draw_box_frame(Bitmap* bmp, 
+    int dx, int dy, int w, int h, uint8 c) {
 
     const int TILE_W = 8;
     const int TILE_H = 8;
@@ -71,7 +72,7 @@ static void draw_box_frame(Bitmap* bmp, int dx, int dy, int w, int h) {
 
     // Fill with black
     fill_rect(dx+TILE_W, dy+TILE_W,
-        (w-2)*TILE_W, (h-2)*TILE_H, 0);
+        (w-2)*TILE_W, (h-2)*TILE_H, c);
 
     // Draw shadows
     fill_rect(dx + w*TILE_W, dy+TILE_H, 
@@ -81,8 +82,8 @@ static void draw_box_frame(Bitmap* bmp, int dx, int dy, int w, int h) {
 }
 
 
-// Draw stage walls
-static void stage_draw_walls(Stage* s, int dx, int dy) {
+// Draw static tiles
+static void stage_draw_static(Stage* s, int dx, int dy) {
 
     int x = 0;
     int y = 0;
@@ -90,14 +91,78 @@ static void stage_draw_walls(Stage* s, int dx, int dy) {
     int sx = 0;
     int sy = 0;
 
+    int t;
+    Bitmap* bmp;
+
     for(; y < s->height; ++ y) {
 
         for(x = 0; x < s->width; ++ x) {
 
-            if(s->data[y*s->width+x] != 1)
+            t = s->data[y*s->width+x] ;
+            if(t < 1)
                 continue;
 
-            draw_bitmap_region_fast(s->bmpTileset,
+            bmp = s->bmpTileset;
+            switch (t)
+            {
+            // Wall
+            case 1:
+                sx = 0; sy = 0;
+                break;
+            // Ice wall
+            case 2:
+                sx = 0; sy = 16;
+                break;
+            // Frozen boulder
+            case 3:
+                sx = 0; sy = 32;
+                break;
+            // Bomb place
+            case 6:
+                sx = 112; sy = 16;
+                break;
+            // Lock
+            case 7:
+                sx = 112; sy = 48;
+                break;
+            // Color blocks
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+                sx = 16 + (t-8)*16;
+                sy = 48;
+                break;
+                
+            // Switches
+            case 14:
+            case 15:
+            case 16:
+            case 30:
+            case 31:
+            case 32:
+                sx = 16 + (t/30)*16 + (t-14)*32;
+                sy = 32;
+                break;
+
+            // Items
+            case 18:
+            case 19:
+            case 20:
+            case 21:
+            case 22:
+                sx = (t-18)*16;
+                sy = 0;
+                bmp = s->bmpItems;
+                break;
+
+            default:
+                continue;
+            }
+
+            draw_bitmap_region_fast(bmp,
                 sx, sy, 16, 16, dx + x*16, dy + y*16);
         }
     }
@@ -131,6 +196,44 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
 }
 
 
+// Add a boulder
+static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
+
+    uint8 i = 0;
+    // Find the first boulder that does
+    // not exist
+    for(; i < s->bcount; ++ i) {
+
+        if(!s->boulders[i].exist) {
+
+            s->boulders[i] = create_boulder(x, y, false);
+            break;
+        }
+    }
+}
+
+
+// Parse objects
+static void stage_parse_objects(Stage* s) {
+
+    uint8 x, y;
+    uint8 t;
+    for(y = 0; y < s->height; ++ y) {
+
+        for(x = 0; x < s->width; ++ x) {
+
+            t = s->data[y*s->width+x];
+
+            // Boulder
+            if(t == 5) {
+
+                stage_add_boulder(s, x, y);
+            }
+        }
+    }
+}
+
+
 // Create a stage object
 Stage* create_stage() {
 
@@ -145,6 +248,7 @@ Stage* create_stage() {
     // Get bitmaps
     s->bmpFrame = (Bitmap*)get_asset("frame");
     s->bmpTileset = (Bitmap*)get_asset("tileset");
+    s->bmpItems = (Bitmap*)get_asset("items");
 
     return s;
 }
@@ -153,7 +257,7 @@ Stage* create_stage() {
 // Initialize a stage
 int stage_init(Stage* s, const char* mapPath) {
 
-    int i;
+    int i, tileid;
     int size;
 
     // Load map
@@ -163,19 +267,28 @@ int stage_init(Stage* s, const char* mapPath) {
         return 1;
     }
 
-    // Copy data
+    // Copy data & compute the amount of
+    // boulders
     size = t->width*(t->height-1);
-    s->data = (int*)malloc(size);
-    s->solid = (int*)malloc(size);
+    s->data = (uint8*)malloc(sizeof(uint8)*size);
+    s->solid = (uint8*)malloc(sizeof(uint8)*size);
     if(s->data == NULL || s->solid == NULL) {
 
         THROW_MALLOC_ERR;
         return 1;
     }
+    s->bcount = 0;
     for(i = 0; i < size; ++ i) {
 
-        s->data[i] = t->layers[0] [i+t->width] -16;
+        tileid = t->layers[0] [i+t->width] -16;
+        s->data[i] = tileid;
         s->solid[i] = 0;
+
+        // If boulder
+        if(tileid == 5 || tileid == 3) {
+
+            ++ s->bcount;
+        }
     }
     s->width = t->width;
     s->height = t->height-1;
@@ -186,22 +299,45 @@ int stage_init(Stage* s, const char* mapPath) {
     s->lavaTimer = 0;
     s->lavaGlowTimer = 0;
 
+    // Allocate memory
+    s->boulders = (Boulder*)calloc(s->bcount, sizeof(Boulder));
+    if(s->boulders == NULL) {
+
+        THROW_MALLOC_ERR;
+        return 1;
+    }
+    // Make inactive
+    for(i = 0; i < s->bcount; ++ i) {
+
+        s->boulders[i].exist = false;
+    }
+    // Parse objects
+    stage_parse_objects(s);
+
     return 0;
 }
 
 
 // Update stage
-void stage_update(Stage* s, int step) {
+void stage_update(Stage* s, int steps) {
 
-    const int LAVA_SPEED = 12;
-    const int LAVA_GLOW_SPEED = 6;
+    const int LAVA_SPEED = 8;
+    const int LAVA_GLOW_SPEED = 4;
+
+    uint8 i;
 
     // Update lava timers
-    s->lavaTimer += LAVA_SPEED * step;
+    s->lavaTimer += LAVA_SPEED * steps;
     s->lavaTimer %= 16 * FIXED_PREC;
 
-    s->lavaGlowTimer += LAVA_GLOW_SPEED * step;
+    s->lavaGlowTimer += LAVA_GLOW_SPEED * steps;
     s->lavaGlowTimer %= 4 * FIXED_PREC;
+
+    // Update boulders
+    for(i = 0; i < s->bcount; ++ i) {
+
+        boulder_update(&s->boulders[i], NULL, steps);
+    }
 }
 
 
@@ -211,6 +347,7 @@ void stage_draw(Stage* s) {
     const int RIGHT_FRAME_WIDTH = 12;
 
     int w;
+    uint8 i;
     int topx = 24;
     int topy = 16;
 
@@ -223,25 +360,31 @@ void stage_draw(Stage* s) {
         // Left
         w = s->width*2 +2;
         draw_box_frame(s->bmpFrame,
-            16, 8, w, s->height*2 +2);
+            16, 8, w, s->height*2 +2, 0);
 
         // Right
         draw_box_frame(s->bmpFrame,
             (w+2)*8+16, 8, 
-            RIGHT_FRAME_WIDTH, s->height*2 +2);
+            RIGHT_FRAME_WIDTH, s->height*2 +2, 0);
 
         s->frameDrawn = true;
     }
 
-    // Draw walls
+    // Draw static tiles
     if(!s->staticDrawn) {
 
-        stage_draw_walls(s, topx, topy);
+        stage_draw_static(s, topx, topy);
         s->staticDrawn = true;
     }
 
     // Draw lava
     stage_draw_lava(s, topx, topy);
+
+    // Draw boulders
+    for(i = 0; i < s->bcount; ++ i) {
+
+        boulder_draw(&s->boulders[i], topx, topy);
+    }
 }
 
 

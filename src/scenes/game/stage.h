@@ -9,27 +9,36 @@
 
 #include <stdbool.h>
 
+#include "boulder.h"
+#include "player.h"
+
 // Stage type
 typedef struct {
 
     // Bitmaps
     Bitmap* bmpFrame;
     Bitmap* bmpTileset;
+    Bitmap* bmpItems;
 
     // Map
     Tilemap* tmap;
     // Active map data
-    int* data;
-    int* solid;
-    int width, height;
+    uint8* data;
+    uint8* solid;
+    uint8 width, height;
 
     // Lava timers
-    int lavaTimer;
-    int lavaGlowTimer;
+    uint16 lavaTimer;
+    uint16 lavaGlowTimer;
 
     // Rendering flags
-    bool frameDrawn;
-    bool staticDrawn;
+    boolean frameDrawn;
+    boolean staticDrawn;
+
+    // Objects
+    Boulder* boulders;
+    Player pl;
+    uint8 bcount;
 
 } Stage;
 

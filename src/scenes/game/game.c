@@ -16,9 +16,6 @@
 // Game scene name
 static const char* GAME_SCENE_NAME = "game";
 
-// Test bitmap
-static Bitmap* bmpFont;
-
 // Game components
 static Stage* stage;
 
@@ -39,9 +36,6 @@ static int16 game_init() {
         return 1;
     }
 
-    // Get font bitmap
-    bmpFont = (Bitmap*)get_asset("font");
-
     // Create main components
     stage = create_stage();
     if(stage == NULL) {
@@ -50,6 +44,7 @@ static int16 game_init() {
     }
 
     // Initialize components
+    init_boulders();
     if(stage_init(stage, "ASSETS/MAPS/0.BIN") == 1) {
 
         return 1;
