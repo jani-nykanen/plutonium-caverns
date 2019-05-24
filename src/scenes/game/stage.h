@@ -49,7 +49,7 @@ Stage* create_stage();
 int stage_init(Stage* s, const char* mapPath);
 
 // Update stage
-void stage_update(Stage* s, int step);
+void stage_update(Stage* s, int steps);
 
 // Draw stage
 void stage_draw(Stage* s);

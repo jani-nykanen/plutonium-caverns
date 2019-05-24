@@ -7,7 +7,7 @@
 
 
 // Create a sprite
-Sprite createSprite(int16 w, int16 h) {
+Sprite create_sprite(int16 w, int16 h) {
 
     Sprite s;
 
@@ -22,7 +22,7 @@ Sprite createSprite(int16 w, int16 h) {
 
 
 // Animate a sprite
-void sprAnimate(Sprite* s, int16 row, int16 start, int16 end, 
+void spr_animate(Sprite* s, int16 row, int16 start, int16 end, 
     int16 speed, int16 steps) {
 
     if(s == NULL) return;

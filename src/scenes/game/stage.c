@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 // Draw frame
 static void draw_box_frame(Bitmap* bmp, 
     int dx, int dy, int w, int h, uint8 c) {
@@ -229,6 +230,11 @@ static void stage_parse_objects(Stage* s) {
 
                 stage_add_boulder(s, x, y);
             }
+            // Player
+            else if(t == 17) {
+
+                s->pl = create_player(x, y);
+            }
         }
     }
 }
@@ -338,6 +344,9 @@ void stage_update(Stage* s, int steps) {
 
         boulder_update(&s->boulders[i], NULL, steps);
     }
+
+    // Update players
+    pl_update(&s->pl, steps);
 }
 
 
@@ -385,6 +394,9 @@ void stage_draw(Stage* s) {
 
         boulder_draw(&s->boulders[i], topx, topy);
     }
+
+    // Draw player
+    pl_draw(&s->pl, topx, topy);
 }
 
 
