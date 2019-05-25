@@ -13,6 +13,7 @@
 typedef struct
 {
     Byte2 pos;
+    Byte2 target;
 
     // Flags
     boolean isBomb;
@@ -33,7 +34,7 @@ Boulder create_boulder(uint8 x, uint8 y, bool makeBomb);
 
 // Update boulder
 // TODO: (void*) => Player*
-void boulder_update(Boulder* b, void* pl, int steps);
+void boulder_update(Boulder* b, void* pl, void* s, int steps);
 
 // Draw
 void boulder_draw(Boulder* b, int dx, int dy);

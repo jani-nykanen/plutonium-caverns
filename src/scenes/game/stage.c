@@ -259,7 +259,7 @@ void stage_update(Stage* s, int steps) {
     // Update boulders
     for(i = 0; i < s->bcount; ++ i) {
 
-        boulder_update(&s->boulders[i], (void*)&s->pl, steps);
+        boulder_update(&s->boulders[i], (void*)&s->pl, (void*)s, steps);
     }
 
     // Update players
