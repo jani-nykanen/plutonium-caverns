@@ -12,7 +12,7 @@
 // Boulder (& bomb) type
 typedef struct
 {
-    uint8 x, y;
+    Byte2 pos;
 
     // Flags
     boolean isBomb;

@@ -99,13 +99,13 @@ static char get_value_from_array(uint8* arr, bool* readArr, int16 id) {
     bool read = readArr[id];
     uint8 ret = 0;
 
-    if(state == Down) {
+    if(state == StateDown) {
 
-        ret = read ? Down : Pressed;
+        ret = read ? StateDown : StatePressed;
     }
-    else if(state == Up) {
+    else if(state == StateUp) {
 
-        ret = read ? Up : Released;
+        ret = read ? StateUp : StateReleased;
     }
     readArr[id] = true;
 
@@ -149,7 +149,7 @@ void destroy_input() {
 int16 input_get_key(int16 id) {
 
     if(id > KEY_BUFFER_SIZE)
-        return Up;
+        return StateUp;
 
     // Get normal key
     return get_value_from_array(
@@ -162,7 +162,7 @@ int16 input_get_key(int16 id) {
 int16 input_get_arrow_key(int16 id) {
 
     if(id > 4)
-        return Up;
+        return StateUp;
 
     // Get arrow key
     return get_value_from_array(
@@ -185,7 +185,7 @@ void input_add_button(int16 index, int16 key) {
 int16 input_get_button(int16 id) {
 
     if(id < 0 || id >= MAX_BUTTONS) 
-        return Up;
+        return StateUp;
 
     return input_get_key(buttons[id]);
 }

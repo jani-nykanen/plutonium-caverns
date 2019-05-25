@@ -17,10 +17,10 @@ enum {
 
 // Key states
 enum {
-    Up = 0,
-    Down = 1,
-    Pressed = 2,
-    Released = 3,
+    StateUp = 0,
+    StateDown = 1,
+    StatePressed = 2,
+    StateReleased = 3,
 };
 
 

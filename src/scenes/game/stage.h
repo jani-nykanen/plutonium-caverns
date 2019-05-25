@@ -54,4 +54,9 @@ void stage_update(Stage* s, int steps);
 // Draw stage
 void stage_draw(Stage* s);
 
+// Draw static tiles
+void stage_draw_static(Stage* s, 
+    uint8 startx, uint8 starty, uint8 ex, uint8 ey,
+    int dx, int dy);
+
 #endif // __STAGE__

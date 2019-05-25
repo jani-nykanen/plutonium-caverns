@@ -6,8 +6,11 @@
 
 #include "../../core/graphics.h"
 #include "../../core/assets.h"
+#include "../../core/mathext.h"
 
 #include <stdio.h>
+
+#include "player.h"
 
 // Bitmaps
 static Bitmap* bmpTileset;
@@ -25,8 +28,8 @@ void init_boulders() {
 Boulder create_boulder(uint8 x, uint8 y, bool makeBomb) {
 
     Boulder b;
-    b.x = x;
-    b.y = y;
+    b.pos.x = x;
+    b.pos.y = y;
     b.isBomb = makeBomb;
 
     // Set defaults
@@ -41,9 +44,22 @@ Boulder create_boulder(uint8 x, uint8 y, bool makeBomb) {
 
 // Update boulder
 // TODO: (void*) => Player*
-void boulder_update(Boulder* b, void* pl, int steps) {
+void boulder_update(Boulder* b, void* _pl, int steps) {
 
-    // ...
+    Player* pl = (Player*)_pl;
+    int16 dist;
+
+    if(!b->exist) return;
+
+    dist = 
+        max_int16(
+            abs_int16((int16)pl->target.x-(int16)b->pos.x),
+            abs_int16((int16)pl->target.y-(int16)b->pos.y)
+        );
+    if(dist <= 2) {
+
+        b->redraw = true;
+    } 
 }
 
 
@@ -53,7 +69,7 @@ void boulder_draw(Boulder* b, int dx, int dy) {
     if(!b->redraw) return;
 
     draw_bitmap_region(bmpTileset, 112, 0, 16, 16,
-        dx + b->x*16, dy + b->y*16, false);
+        dx + b->pos.x*16, dy + b->pos.y*16, false);
 
     b->redraw = false;
 }

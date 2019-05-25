@@ -14,6 +14,7 @@
 #define _DECL_CONSTRUCTOR(ret, type, name) ret name(type x, type y);
 
 typedef unsigned char  uint8;
+typedef signed char  int8;
 typedef unsigned short uint16;
 typedef signed short   int16;
 typedef bool boolean;
@@ -31,6 +32,12 @@ typedef struct {
     uint16 y;
 
 } Vector2u;
+typedef struct {
+    
+    uint8 x;
+    uint8 y;
+
+} Byte2;
 
 // Rectangle
 typedef struct {
@@ -43,5 +50,6 @@ typedef struct {
 // Constructors
 _DECL_CONSTRUCTOR(Vector2, int16, vec2);
 _DECL_CONSTRUCTOR(Vector2u, uint16, vec2u);
+_DECL_CONSTRUCTOR(Byte2, uint8, byte2);
 
 #endif // __TYPES_H__

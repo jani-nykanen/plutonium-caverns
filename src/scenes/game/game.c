@@ -165,7 +165,7 @@ static int16 game_init() {
 static void game_update(int16 steps) {
 
     // Quit (TEMPORARY!)
-    if(input_get_button(4) == Pressed) {
+    if(input_get_button(4) == StatePressed) {
 
         app_terminate();
     }

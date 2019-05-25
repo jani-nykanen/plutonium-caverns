@@ -11,3 +11,4 @@
 // Constructors (for vectors)
 _DEF_CONSTRUCTOR(Vector2, int16, vec2)
 _DEF_CONSTRUCTOR(Vector2u, uint16, vec2u)
+_DEF_CONSTRUCTOR(Byte2, uint8, byte2)
