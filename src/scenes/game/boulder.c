@@ -60,6 +60,9 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
         b->moving = false;
         b->pos = b->target;
         b->moveTimer = 0;
+
+        // Update solid data
+        stage_update_solid(s, b->pos.x, b->pos.y, 2);
     }
 
     // Move
@@ -84,7 +87,8 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
 
                 // Check if free tile
                 if(b->target.x < 1 || b->target.x >= s->width-1 ||
-                    b->target.y < 1 || b->target.y >= s->height-1) {
+                    b->target.y < 1 || b->target.y >= s->height-1 ||
+                    stage_get_solid_data(s, b->target.x, b->target.y) == 2) {
                     
                     pl->target = pl->pos;
                     pl->moveTimer = 0;
@@ -95,6 +99,9 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
 
                     b->moving = true;
                     b->moveTimer = pl->moveTimer;
+
+                    // Update solid data
+                    stage_update_solid(s, b->pos.x, b->pos.y, 0);
                 }
             }
         }

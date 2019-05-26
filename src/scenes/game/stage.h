@@ -59,4 +59,10 @@ void stage_draw_static(Stage* s,
     uint8 startx, uint8 starty, uint8 ex, uint8 ey,
     int dx, int dy);
 
+// Update solid data
+void stage_update_solid(Stage* s, uint8 x, uint8 y, uint8 value);
+
+// Get solid tile data
+uint8 stage_get_solid_data(Stage* s, uint8 x, uint8 y);
+
 #endif // __STAGE__

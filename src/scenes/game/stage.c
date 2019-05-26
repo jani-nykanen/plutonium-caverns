@@ -122,6 +122,8 @@ static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
         if(!s->boulders[i].exist) {
 
             s->boulders[i] = create_boulder(x, y, false);
+            // Update solid data "under" the boulder
+            stage_update_solid(s, x, y, 2);
             break;
         }
     }
@@ -412,4 +414,25 @@ void stage_draw_static(Stage* s,
                 sx, sy, 16, 16, dx + x*16, dy + y*16);
         }
     }
+}
+
+
+// Update solid data
+void stage_update_solid(Stage* s, uint8 x, uint8 y, 
+    uint8 value) {
+    
+    if(x > s->width-1 || y > s->height-1) 
+        return;
+
+    s->solid[y*s->width+x] = value;
+}
+
+
+// Get solid tile data
+uint8 stage_get_solid_data(Stage* s, uint8 x, uint8 y) {
+
+    if(x > s->width-1 || y > s->height-1) 
+        return 1;
+
+    return s->solid[y*s->width+x];
 }
