@@ -61,6 +61,18 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
         b->pos = b->target;
         b->moveTimer = 0;
 
+        // Check if in lava
+        if(stage_get_solid_data(s, b->pos.x, b->pos.y) == 3) {
+
+            // Remove lava
+            stage_update_tile(s, b->pos.x, b->pos.y, 0);
+            stage_update_solid(s, b->pos.x, b->pos.y, 0);
+
+            // Stop existing
+            b->exist = false;
+            return;
+        }
+
         // Update solid data
         stage_update_solid(s, b->pos.x, b->pos.y, 2);
     }

@@ -122,8 +122,7 @@ static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
         if(!s->boulders[i].exist) {
 
             s->boulders[i] = create_boulder(x, y, false);
-            // Update solid data "under" the boulder
-            stage_update_solid(s, x, y, 2);
+            s->solid[y*s->width+x] = 2;
             break;
         }
     }
@@ -153,6 +152,37 @@ static void stage_parse_objects(Stage* s) {
                 s->pl = create_player(x, y);
                 s->data[y*s->width+x] = 0;
             }
+        }
+    }
+}
+
+
+// Set solid
+static void stage_set_solid(Stage* s) {
+
+    uint8 x, y;
+    uint8 t;
+    int16 p;
+    for(y = 0; y < s->height; ++ y) {
+
+        for(x = 0; x < s->width; ++ x) {
+
+            t = 0;
+            p = y*s->width+x;
+            switch (s->data[p])
+            {
+            // Lava
+            case 4:
+                t = 3;
+                break;
+            case 5:
+                t = 2;
+                break;
+            
+            default:
+                break;
+            }
+            s->solid[p] = t;
         }
     }
 }
@@ -236,6 +266,10 @@ int stage_init(Stage* s, const char* mapPath) {
 
         s->boulders[i].exist = false;
     }
+
+    // Set solid data
+    stage_set_solid(s);
+
     // Parse objects
     stage_parse_objects(s);
 
@@ -435,4 +469,24 @@ uint8 stage_get_solid_data(Stage* s, uint8 x, uint8 y) {
         return 1;
 
     return s->solid[y*s->width+x];
+}
+
+
+// Update tile data
+void stage_update_tile(Stage* s, uint8 x, uint8 y, uint8 value) {
+
+    if(x > s->width-1 || y > s->height-1) 
+        return;
+
+    s->data[y*s->width+x] = value;
+}
+
+
+// Get tile data
+uint8 stage_get_tile_data(Stage* s, uint8 x, uint8 y) {
+
+    if(x > s->width-1 || y > s->height-1) 
+        return 0;
+
+    return s->data[y*s->width+x];
 }

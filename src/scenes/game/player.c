@@ -19,6 +19,14 @@ static const int8 MOVE_TIME = 16;
 static Bitmap* bmpPlayer;
 
 
+// Check if free tile
+static bool pl_check_free_tile(Player* pl, Stage* s, uint8 tx, uint8 ty) {
+
+    uint8 t = stage_get_solid_data(s, tx, ty);
+    return t != 3;
+}
+
+
 // Control player
 static void pl_control(Player* pl, Stage* s) {
 
@@ -53,17 +61,20 @@ static void pl_control(Player* pl, Stage* s) {
     // If movement
     if(tx != pl->pos.x || ty != pl->pos.y) {
 
-        // Check if free
-        if(tx > 0 && ty > 0 && tx < s->width-1 && ty < s->height-1) {
+        pl->direction = dir;
+        pl->flip = flip;
+        pl->redraw = true;
 
+        // Check if free
+        if( (tx > 0 && ty > 0 && tx < s->width-1 && ty < s->height-1) &&
+            pl_check_free_tile(pl, s, tx, ty) ) {
+
+            // Start moving
             pl->moveTimer = MOVE_TIME;
             pl->moving = true;
             pl->redraw = true;
 
             pl->target = byte2(tx, ty);
-
-            pl->direction = dir;
-            pl->flip = flip;
         }
     }
 }
