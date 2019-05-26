@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// Initial animation time
+static const int8 INITIAL_ANIM_TIME = 16;
+
 
 // Draw frame
 static void draw_box_frame(Bitmap* bmp, 
@@ -87,13 +90,15 @@ static void draw_box_frame(Bitmap* bmp,
 // Draw lava
 static void stage_draw_lava(Stage* s, int dx, int dy) {
 
-    int x = 0;
-    int y = 0;
+    int16 skip;
 
-    int t = s->lavaTimer / FIXED_PREC;
-    int sx = 16+t;
-    int sy = 16-t;
-    int p = s->lavaGlowTimer / FIXED_PREC;
+    int16 x = 0;
+    int16 y = 0;
+
+    int16 t = s->lavaTimer / FIXED_PREC;
+    int16 sx = 16+t;
+    int16 sy = 16-t;
+    int16 p = s->lavaGlowTimer / FIXED_PREC;
     if(p >= 3) p = 1;
     sx += 32 * p;
 
@@ -104,8 +109,22 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
             if(s->data[y*s->width+x] != 4)
                 continue;
 
-            draw_bitmap_region_fast(s->bmpTileset,
-                sx, sy, 16, 16, dx + x*16, dy + y*16);
+            // Check if disappearing lava
+            if(s->animTimer > 0 && 
+                x == s->animPos.x && y == s->animPos.y) {
+
+                skip = s->animTimer / 4;
+
+                fill_rect(dx + x*16, dy + y*16, 16, 16, 0);
+                if(skip > 0) {
+                    draw_bitmap_region_skip(s->bmpTileset,
+                        sx, sy, 16, 16, dx + x*16, dy + y*16, skip, false);
+                }
+            }
+            else {
+                draw_bitmap_region_fast(s->bmpTileset,
+                    sx, sy, 16, 16, dx + x*16, dy + y*16);
+            }
         }
     }
 }
@@ -129,11 +148,13 @@ static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
 }
 
 
-// Parse objects
+// Parse objects (plus pass data to certain the player
+// object)
 static void stage_parse_objects(Stage* s) {
 
     uint8 x, y;
     uint8 t;
+    uint8 maxGems = 0;
     for(y = 0; y < s->height; ++ y) {
 
         for(x = 0; x < s->width; ++ x) {
@@ -152,8 +173,21 @@ static void stage_parse_objects(Stage* s) {
                 s->pl = create_player(x, y);
                 s->data[y*s->width+x] = 0;
             }
+            // Gem
+            else if(t == 22) {
+
+                ++ maxGems;
+            }
         }
     }
+
+    // Get object counts
+    s->pl.pickaxe = s->tmap->layers[0][0] -1;
+    s->pl.shovel = s->tmap->layers[0][1] -1;
+    s->pl.bombs = s->tmap->layers[0][2] -1;
+    s->pl.keys = 0;
+    s->pl.gems = 0;
+    s->pl.maxGems = maxGems;
 }
 
 
@@ -253,6 +287,8 @@ int stage_init(Stage* s, const char* mapPath) {
     s->staticDrawn = false;
     s->lavaTimer = 0;
     s->lavaGlowTimer = 0;
+    s->animTimer = 0;
+    s->animPos = byte2(0, 0);
 
     // Allocate memory
     s->boulders = (Boulder*)calloc(s->bcount, sizeof(Boulder));
@@ -291,6 +327,24 @@ void stage_update(Stage* s, int steps) {
 
     s->lavaGlowTimer += LAVA_GLOW_SPEED * steps;
     s->lavaGlowTimer %= 4 * FIXED_PREC;
+
+    // Update animation timer
+    if(s->animTimer > 0) {
+
+        s->animTimer -= steps;
+        if(s->animTimer <= 0) {
+
+            s->animTimer = 0;
+            s->data[s->animPos.y*s->width+s->animPos.x] = 0;
+
+            // Make sure the player is not moving
+            s->pl.moving = false;
+            s->pl.moveTimer = 0;
+            s->pl.target = s->pl.pos;
+        }
+
+        return;
+    }
 
     // Update boulders
     for(i = 0; i < s->bcount; ++ i) {
@@ -478,6 +532,14 @@ void stage_update_tile(Stage* s, uint8 x, uint8 y, uint8 value) {
     if(x > s->width-1 || y > s->height-1) 
         return;
 
+    // Activate lava death animation
+    if(s->data[y*s->width+x] == 4 && value == 0) {
+
+        s->animTimer = INITIAL_ANIM_TIME;
+        s->animPos = byte2(x, y);
+        return;
+    }
+
     s->data[y*s->width+x] = value;
 }
 
@@ -489,4 +551,49 @@ uint8 stage_get_tile_data(Stage* s, uint8 x, uint8 y) {
         return 0;
 
     return s->data[y*s->width+x];
+}
+
+
+// Item collision
+void stage_item_collision(Player* pl, Stage* s) {
+
+    uint8 t = s->data[pl->pos.y*s->width+pl->pos.x];
+    boolean remove = false;
+
+    switch (t)
+    {
+    case 18:
+        ++ pl->keys;
+        remove = true;
+        break;
+
+    case 19:
+        pl->pickaxe = (uint8)min_int16(5, pl->pickaxe+3);
+        remove = true;
+        break;
+
+    case 20:
+        pl->shovel = (uint8)min_int16(5, pl->shovel+3);
+        remove = true;
+        break;
+
+    case 21:
+        ++ pl->bombs;
+        remove = true;
+        break;
+
+    case 22:
+        ++ pl->gems;
+        remove = true;
+        break;
+
+    default:
+        break;
+    }
+
+    if(remove) {
+
+        s->data[pl->pos.y*s->width+pl->pos.x] = 0;
+        pl->itemsChanged = true;
+    }
 }

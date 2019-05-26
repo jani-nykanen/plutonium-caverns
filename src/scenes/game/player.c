@@ -126,6 +126,8 @@ Player create_player(uint8 x, uint8 y) {
     pl.redraw = true;
     pl.flip = false;
 
+    pl.itemsChanged = true;
+
     return pl;
 }
 
@@ -156,6 +158,9 @@ void pl_update(Player* pl, void* _s, int steps) {
             // Move to the target
             pl->pos = pl->target;
             pl->moving = false;
+
+            // Check item collisions
+            stage_item_collision(pl, s);
         }
     }
 }

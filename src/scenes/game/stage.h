@@ -40,6 +40,10 @@ typedef struct {
     Player pl;
     uint8 bcount;
 
+    // Animation timer
+    int8 animTimer;
+    Byte2 animPos;
+
 } Stage;
 
 // Create a stage object
@@ -70,5 +74,8 @@ void stage_update_tile(Stage* s, uint8 x, uint8 y, uint8 value);
 
 // Get tile data
 uint8 stage_get_tile_data(Stage* s, uint8 x, uint8 y);
+
+// Item collision
+void stage_item_collision(Player* pl, Stage* s);
 
 #endif // __STAGE__

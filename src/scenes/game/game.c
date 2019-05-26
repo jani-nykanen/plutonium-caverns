@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../../core/graphics.h"
 #include "../../core/input.h"
@@ -22,14 +23,6 @@ static Bitmap* bmpItems;
 
 // Game components
 static Stage* stage;
-
-// Item counts
-static uint8 pickaxe;
-static uint8 shovel;
-static uint8 bombs;
-static uint8 keys;
-static uint8 gems;
-static uint8 maxGems;
 
 // Render flags
 static boolean redrawHUD;
@@ -66,6 +59,7 @@ static void game_draw_hud() {
     const int BAR_MAX = 5;
 
     uint8 i = 0;
+    char buf[8];
 
     // Draw stage name
     draw_text_fast(bmpFont, "STAGE 1", 
@@ -80,31 +74,34 @@ static void game_draw_hud() {
     // Draw corresponding energy bars
     draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+1, 
-        BAR_MAX, pickaxe);
+        BAR_MAX, stage->pl.pickaxe);
     draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+ITEM_OFF_Y+1, 
-        BAR_MAX, shovel);
+        BAR_MAX, stage->pl.shovel);
 
     // Draw collectable item icons
-    draw_bitmap_region_fast(bmpItems, 48, 0, 16, 16,
-        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2);
     draw_bitmap_region_fast(bmpItems, 0, 0, 16, 16,
+        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2);
+    draw_bitmap_region_fast(bmpItems, 48, 0, 16, 16,
         TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3);
 
     // Draw collectable item counts
-    draw_text_fast(bmpFont, "\2\60", 
+    snprintf(buf, 8, "\2%d", (int16)stage->pl.keys);
+    draw_text_fast(bmpFont, buf, 
         TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2 +4, 
         0, 0, false);
-    draw_text_fast(bmpFont, "\2\60", 
+    snprintf(buf, 8, "\2%d", (int16)stage->pl.bombs);
+    draw_text_fast(bmpFont, buf, 
         TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3 +4, 
         0, 0, false);
 
     // Draw gems
-    for(i = 0; i < 2; ++ i) {
+    for(i = 0; i < stage->pl.maxGems; ++ i) {
 
-        draw_bitmap_region_fast(bmpItems, 80, 0, 16, 16,
+        draw_bitmap_region_fast(bmpItems, 
+            i < stage->pl.gems ? 64 : 80, 0, 16, 16,
             TOP_X+ITEM_X+i*ITEM_OFF_X, 
             TOP_Y+ITEM_START_Y+ITEM_OFF_Y*4);
     }
@@ -146,14 +143,6 @@ static int16 game_init() {
         return 1;
     }
 
-    // Get object counts
-    pickaxe = stage->tmap->layers[0][0] -1;
-    shovel = stage->tmap->layers[0][1] -1;
-    bombs = stage->tmap->layers[0][2] -1;
-    keys = 0;
-    gems = 0;
-    maxGems = 2; // TODO: Read from tilemap!
-
     // Set defaults
     redrawHUD = true;
 
@@ -182,10 +171,10 @@ static void game_draw() {
     stage_draw(stage);
 
     // Draw HUD
-    if(redrawHUD) {
+    if(stage->pl.itemsChanged) {
 
         game_draw_hud();
-        redrawHUD = false;
+        stage->pl.itemsChanged = false;
     }
 }
 

@@ -21,6 +21,16 @@ typedef struct
     // Rendering flags
     boolean redraw;
     boolean flip;
+    // Other flags
+    boolean itemsChanged;
+
+    // Item info
+    uint8 pickaxe;
+    uint8 shovel;
+    uint8 bombs;
+    uint8 keys;
+    uint8 gems;
+    uint8 maxGems;
 
 } Player;
 
