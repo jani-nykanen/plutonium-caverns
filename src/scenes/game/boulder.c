@@ -97,10 +97,11 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
                 b->target.x = b->pos.x+dir.x;
                 b->target.y = b->pos.y+dir.y;
 
-                // Check if free tile
+                // Check if not a free tile
                 if(b->target.x < 1 || b->target.x >= s->width-1 ||
                     b->target.y < 1 || b->target.y >= s->height-1 ||
-                    stage_get_solid_data(s, b->target.x, b->target.y) == 2) {
+                    (stage_get_solid_data(s, b->target.x, b->target.y) > 0 &&
+                     stage_get_solid_data(s, b->target.x, b->target.y) != 3) ) {
                     
                     pl->target = pl->pos;
                     pl->moveTimer = 0;
@@ -138,7 +139,7 @@ void boulder_draw(Boulder* b, int dx, int dy) {
 
     int16 x, y;
 
-    if(!b->redraw) return;
+    if(!b->exist || !b->redraw) return;
 
     // Determine render position
     x = b->target.x*16;

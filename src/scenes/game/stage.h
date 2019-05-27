@@ -45,6 +45,7 @@ typedef struct {
 
     // Animation timer
     int8 animTimer;
+    uint8 animMode;
     Byte2 animPos;
 
 } Stage;
@@ -64,7 +65,7 @@ void stage_draw(Stage* s);
 // Draw static tiles
 void stage_draw_static(Stage* s, 
     uint8 startx, uint8 starty, uint8 ex, uint8 ey,
-    int dx, int dy);
+    int16 dx, int16 dy, int16 skip);
 
 // Update solid data
 void stage_update_solid(Stage* s, uint8 x, uint8 y, uint8 value);
@@ -83,5 +84,8 @@ void stage_item_collision(Player* pl, Stage* s);
 
 // Activation event
 void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s);
+
+// Set animation
+void stage_set_animation(Stage* s, uint8 mode, uint8 x, uint8 y);
 
 #endif // __STAGE__

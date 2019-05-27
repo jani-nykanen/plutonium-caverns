@@ -110,7 +110,8 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
                 continue;
 
             // Check if disappearing lava
-            if(s->animTimer > 0 && 
+            if( s->animTimer > 0 && 
+                s->animMode == 4 &&
                 x == s->animPos.x && y == s->animPos.y) {
 
                 skip = s->animTimer / 4;
@@ -206,6 +207,8 @@ static void stage_set_solid(Stage* s) {
             switch (s->data[p])
             {
 
+            // Solid wall
+            case 1:
             // Color blocks
             case 8:
             case 9:
@@ -226,6 +229,17 @@ static void stage_set_solid(Stage* s) {
             case 31:
             case 32:
                 t = 4;
+                break;
+
+            // Lock
+            case 7:
+                t = 6;
+                break;
+
+            // Frozen wall
+            case 2:
+            case 3:
+                t = 5;
                 break;
             
             default:
@@ -304,6 +318,7 @@ int stage_init(Stage* s, const char* mapPath) {
     s->lavaGlowTimer = 0;
     s->animTimer = 0;
     s->animPos = byte2(0, 0);
+    s->animMode = 0;
     s->topLeft = vec2(24, 16);
 
     // Allocate memory
@@ -382,8 +397,20 @@ void stage_draw(Stage* s) {
     uint8 i;
     int16 topx = s->topLeft.x;
     int16 topy = s->topLeft.y;
+    int16 skip;
 
     toggle_clipping(false);
+
+    // Animation
+    if(s->animMode == 1 && s->animTimer > 0) {
+
+        skip = s->animTimer / 4;
+        if(skip > 0) {
+            stage_draw_static(s, s->animPos.x, s->animPos.y, 
+                s->animPos.x, s->animPos.y,
+                topx, topy , s->animTimer / 4 );
+        }
+    }
 
     // Draw frames
     if(!s->frameDrawn) {
@@ -409,7 +436,7 @@ void stage_draw(Stage* s) {
 
         stage_draw_static(s, 
             0, 0, s->width-1, s->height-1,
-            topx, topy);
+            topx, topy, 0);
         s->staticDrawn = true;
     }
 
@@ -432,7 +459,7 @@ void stage_draw(Stage* s) {
 // Draw static tiles
 void stage_draw_static(Stage* s, 
     uint8 startx, uint8 starty, uint8 ex, uint8 ey,
-    int dx, int dy) {
+    int16 dx, int16 dy, int16 skip) {
 
     uint8 x = 0;
     uint8 y = 0;
@@ -519,8 +546,17 @@ void stage_draw_static(Stage* s,
                 continue;
             }
 
-            draw_bitmap_region_fast(bmp,
-                sx, sy, 16, 16, dx + x*16, dy + y*16);
+            if(skip > 0) {
+
+                fill_rect(dx + x*16, dy + y*16, 16, 16, 0);
+                draw_bitmap_region_skip(bmp,
+                    sx, sy, 16, 16, dx + x*16, dy + y*16, skip,
+                    false);
+            }
+            else {
+                draw_bitmap_region_fast(bmp,
+                    sx, sy, 16, 16, dx + x*16, dy + y*16);
+            }
         }
     }
 }
@@ -556,8 +592,7 @@ void stage_update_tile(Stage* s, uint8 x, uint8 y, uint8 value) {
     // Activate lava death animation
     if(s->data[y*s->width+x] == 4 && value == 0) {
 
-        s->animTimer = INITIAL_ANIM_TIME;
-        s->animPos = byte2(x, y);
+        stage_set_animation(s, 4, x, y);
         return;
     }
 
@@ -629,7 +664,9 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
     int16 dif;
 
     // Switch
-    if(t == 4) {
+    switch (t)
+    {
+    case 4:
 
         // Toggle blocks
         for(i = 0; i < s->width*s->height; ++ i) {
@@ -647,6 +684,12 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             }
         }
 
+        // Make sure boulders are re-drawn
+        for(i = 0; i < s->bcount; ++ i) {
+
+            s->boulders[i].redraw = true;
+        }
+
         // Toggle switch
         if(s->data[j] < 17) {
 
@@ -658,6 +701,32 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
         }
 
         stage_draw_static(s, 1, 1, s->width-2, s->height-2, 
-            s->topLeft.x, s->topLeft.y);
+            s->topLeft.x, s->topLeft.y, 0);
+    
+        break;
+        
+    // Lock
+    case 6: 
+        stage_update_solid(s, tx, ty, 0);
+        stage_set_animation(s, 1, tx, ty);
+        break;
+
+    // Frozen
+    case 5: 
+        stage_update_solid(s, tx, ty, 0);
+        stage_set_animation(s, 1, tx, ty);
+        break;
+
+    default:
+        break;
     }
+}
+
+
+// Set animation
+void stage_set_animation(Stage* s, uint8 mode, uint8 x, uint8 y) {
+
+    s->animMode = mode;
+    s->animTimer = INITIAL_ANIM_TIME;
+    s->animPos = byte2(x, y);
 }

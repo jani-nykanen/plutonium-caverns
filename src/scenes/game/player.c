@@ -23,7 +23,7 @@ static Bitmap* bmpPlayer;
 static bool pl_check_free_tile(Player* pl, Stage* s, uint8 tx, uint8 ty) {
 
     uint8 t = stage_get_solid_data(s, tx, ty);
-    return t != 1 && t != 3 && t != 4;
+    return t == 0 || t == 2;
 }
 
 
@@ -204,7 +204,7 @@ void pl_draw(Player* pl, void* _s,  int dx, int dy) {
 
      // Redraw bottom tiles
     stage_draw_static(s, pl->pos.x-1, pl->pos.y-1, 
-        pl->pos.x+1, pl->pos.y+1, dx, dy);
+        pl->pos.x+1, pl->pos.y+1, dx, dy, 0);
 
     // Draw sprite
     spr_draw(&pl->spr, bmpPlayer, 
