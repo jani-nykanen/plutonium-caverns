@@ -23,7 +23,19 @@ static Bitmap* bmpPlayer;
 static bool pl_check_free_tile(Player* pl, Stage* s, uint8 tx, uint8 ty) {
 
     uint8 t = stage_get_solid_data(s, tx, ty);
-    return t != 3;
+    return t != 1 && t != 3 && t != 4;
+}
+
+
+// Get down state
+static int16 get_down_state(int16 arrow) {
+    
+    int16 state = input_get_arrow_key(arrow);
+    if(state == StateUp || state == StateReleased)
+        return -1;
+    else
+        return state == StatePressed ? 1 : 0;
+    
 }
 
 
@@ -33,26 +45,27 @@ static void pl_control(Player* pl, Stage* s) {
     uint8 tx = pl->pos.x;
     uint8 ty = pl->pos.y;
     uint8 dir;
+    int16 state;
     boolean flip = false;
 
     // Check arrow keys
-    if(input_get_arrow_key(ArrowLeft) == StateDown) {
+    if( (state = get_down_state(ArrowLeft)) >= 0) {
 
         -- tx;
         dir = 3;
         flip = true;
     }
-    else if(input_get_arrow_key(ArrowRight) == StateDown) {
+    else if( (state = get_down_state(ArrowRight)) >= 0) {
 
         ++ tx;
         dir = 2;
     }
-    else if(input_get_arrow_key(ArrowUp) == StateDown) {
+    else if( (state = get_down_state(ArrowUp)) >= 0) {
 
         -- ty;
         dir = 1;
     }
-    else if(input_get_arrow_key(ArrowDown) == StateDown) {
+    else if( (state = get_down_state(ArrowDown)) >= 0) {
 
         ++ ty;
         dir = 0;
@@ -75,6 +88,11 @@ static void pl_control(Player* pl, Stage* s) {
             pl->redraw = true;
 
             pl->target = byte2(tx, ty);
+        }
+        // Otherwise activate possibly solid tile
+        else if(state == 1) {
+
+            stage_activate_tile(pl, tx, ty, s);
         }
     }
 }

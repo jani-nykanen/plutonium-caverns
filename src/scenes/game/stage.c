@@ -205,12 +205,27 @@ static void stage_set_solid(Stage* s) {
             p = y*s->width+x;
             switch (s->data[p])
             {
+
+            // Color blocks
+            case 8:
+            case 9:
+            case 10:
+                t = 1;
+                break;
+
             // Lava
             case 4:
                 t = 3;
                 break;
-            case 5:
-                t = 2;
+
+            // Switches
+            case 14:
+            case 15:
+            case 16:
+            case 30:
+            case 31:
+            case 32:
+                t = 4;
                 break;
             
             default:
@@ -289,6 +304,7 @@ int stage_init(Stage* s, const char* mapPath) {
     s->lavaGlowTimer = 0;
     s->animTimer = 0;
     s->animPos = byte2(0, 0);
+    s->topLeft = vec2(24, 16);
 
     // Allocate memory
     s->boulders = (Boulder*)calloc(s->bcount, sizeof(Boulder));
@@ -362,10 +378,10 @@ void stage_draw(Stage* s) {
 
     const int RIGHT_FRAME_WIDTH = 12;
 
-    int w;
+    int16 w;
     uint8 i;
-    int topx = 24;
-    int topy = 16;
+    int16 topx = s->topLeft.x;
+    int16 topy = s->topLeft.y;
 
     toggle_clipping(false);
 
@@ -479,7 +495,12 @@ void stage_draw_static(Stage* s,
             case 30:
             case 31:
             case 32:
-                sx = 16 + (t/30)*16 + (t-14)*32;
+                if(t <= 16)
+                    sx = 16 + (t-14)*32; 
+                else
+                    sx = 32 + (t-30)*32;
+                
+
                 sy = 32;
                 break;
 
@@ -595,5 +616,48 @@ void stage_item_collision(Player* pl, Stage* s) {
 
         s->data[pl->pos.y*s->width+pl->pos.x] = 0;
         pl->itemsChanged = true;
+    }
+}
+
+
+// Activation event
+void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
+
+    uint16 i;
+    uint16 j = ty * s->width + tx;
+    uint8 t = s->solid[j];
+    int16 dif;
+
+    // Switch
+    if(t == 4) {
+
+        // Toggle blocks
+        for(i = 0; i < s->width*s->height; ++ i) {
+
+            dif = ((s->data[j]-1)%16)-((s->data[i]-1)%16);
+            if(dif == 3) {
+
+                s->solid[i] = 1;
+                s->data[i] -= 3;
+            }
+            else if(dif == 6) {
+
+                s->solid[i] = 0;
+                s->data[i] += 3;
+            }
+        }
+
+        // Toggle switch
+        if(s->data[j] < 17) {
+
+            s->data[j] += 16;
+        }
+        else {
+
+            s->data[j] -= 16;
+        }
+
+        stage_draw_static(s, 1, 1, s->width-2, s->height-2, 
+            s->topLeft.x, s->topLeft.y);
     }
 }

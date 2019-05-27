@@ -15,6 +15,9 @@
 // Stage type
 typedef struct {
 
+    // Upper corner
+    Vector2 topLeft;
+
     // Bitmaps
     Bitmap* bmpFrame;
     Bitmap* bmpTileset;
@@ -77,5 +80,8 @@ uint8 stage_get_tile_data(Stage* s, uint8 x, uint8 y);
 
 // Item collision
 void stage_item_collision(Player* pl, Stage* s);
+
+// Activation event
+void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s);
 
 #endif // __STAGE__
