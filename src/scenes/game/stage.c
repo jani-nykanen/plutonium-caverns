@@ -238,8 +238,11 @@ static void stage_set_solid(Stage* s) {
 
             // Frozen wall
             case 2:
-            case 3:
                 t = 5;
+                break;
+            // Frozen boulder
+            case 3:
+                t = 7;
                 break;
             
             default:
@@ -372,6 +375,13 @@ void stage_update(Stage* s, int steps) {
             s->pl.moving = false;
             s->pl.moveTimer = 0;
             s->pl.target = s->pl.pos;
+
+            // Create a boulder, if destroying a frozen
+            // boulder
+            if(s->animMode == 2) {
+
+                stage_add_boulder(s, s->animPos.x, s->animPos.y);
+            }
         }
 
         return;
@@ -402,10 +412,24 @@ void stage_draw(Stage* s) {
     toggle_clipping(false);
 
     // Animation
-    if(s->animMode == 1 && s->animTimer > 0) {
+    if( (s->animMode == 1 || s->animMode == 2) 
+        && s->animTimer > 0) {
 
         skip = s->animTimer / 4;
         if(skip > 0) {
+
+            fill_rect(topx + s->animPos.x*16, topy + s->animPos.y*16, 
+                16, 16, 0);
+
+            // Draw boulder behind if a frozen boulder
+            if(s->animMode == 2) {
+
+                draw_bitmap_region(s->bmpTileset, 112,0, 16, 16,
+                    topx + s->animPos.x*16, topy + s->animPos.y*16,
+                    false);
+            }
+
+            // Draw the disappearing tile
             stage_draw_static(s, s->animPos.x, s->animPos.y, 
                 s->animPos.x, s->animPos.y,
                 topx, topy , s->animTimer / 4 );
@@ -548,7 +572,6 @@ void stage_draw_static(Stage* s,
 
             if(skip > 0) {
 
-                fill_rect(dx + x*16, dy + y*16, 16, 16, 0);
                 draw_bitmap_region_skip(bmp,
                     sx, sy, 16, 16, dx + x*16, dy + y*16, skip,
                     false);
@@ -707,14 +730,41 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
         
     // Lock
     case 6: 
-        stage_update_solid(s, tx, ty, 0);
-        stage_set_animation(s, 1, tx, ty);
+        if(pl->keys > 0) {
+
+            stage_update_solid(s, tx, ty, 0);
+            stage_set_animation(s, 1, tx, ty);
+
+            -- pl->keys;
+            pl->itemsChanged = true;
+        }
         break;
 
     // Frozen
     case 5: 
-        stage_update_solid(s, tx, ty, 0);
-        stage_set_animation(s, 1, tx, ty);
+    case 7:
+
+        if(pl->pickaxe > 0) {
+
+            stage_update_solid(s, tx, ty, 0);
+            stage_set_animation(s, t == 5 ? 1 : 2, tx, ty);
+
+            -- pl->pickaxe;
+            pl->itemsChanged = true;
+        }
+        break;
+
+    // Lava
+    case 3:
+
+        if(pl->shovel > 0) {
+
+            stage_update_solid(s, tx, ty, 0);
+            stage_set_animation(s, 4, tx, ty);
+
+            -- pl->shovel;
+            pl->itemsChanged = true;
+        }
         break;
 
     default:
