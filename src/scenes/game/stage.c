@@ -12,7 +12,8 @@
 #include <stdio.h>
 
 // Initial animation time
-static const int8 INITIAL_ANIM_TIME = 16;
+static const int8 INITIAL_ANIM_TIME = 32;
+static const int8 ANIM_SKIP = 8;
 
 
 // Draw frame
@@ -114,7 +115,7 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
                 s->animMode == 4 &&
                 x == s->animPos.x && y == s->animPos.y) {
 
-                skip = s->animTimer / 4;
+                skip = s->animTimer / ANIM_SKIP;
 
                 fill_rect(dx + x*16, dy + y*16, 16, 16, 0);
                 if(skip > 0) {
@@ -269,6 +270,7 @@ Stage* create_stage() {
     s->bmpFrame = (Bitmap*)get_asset("frame");
     s->bmpTileset = (Bitmap*)get_asset("tileset");
     s->bmpItems = (Bitmap*)get_asset("items");
+    s->bmpAnim = (Bitmap*)get_asset("anim");
 
     return s;
 }
@@ -411,31 +413,6 @@ void stage_draw(Stage* s) {
 
     toggle_clipping(false);
 
-    // Animation
-    if( (s->animMode == 1 || s->animMode == 2) 
-        && s->animTimer > 0) {
-
-        skip = s->animTimer / 4;
-        if(skip > 0) {
-
-            fill_rect(topx + s->animPos.x*16, topy + s->animPos.y*16, 
-                16, 16, 0);
-
-            // Draw boulder behind if a frozen boulder
-            if(s->animMode == 2) {
-
-                draw_bitmap_region(s->bmpTileset, 112,0, 16, 16,
-                    topx + s->animPos.x*16, topy + s->animPos.y*16,
-                    false);
-            }
-
-            // Draw the disappearing tile
-            stage_draw_static(s, s->animPos.x, s->animPos.y, 
-                s->animPos.x, s->animPos.y,
-                topx, topy , s->animTimer / 4 );
-        }
-    }
-
     // Draw frames
     if(!s->frameDrawn) {
 
@@ -466,6 +443,47 @@ void stage_draw(Stage* s) {
 
     // Draw lava
     stage_draw_lava(s, topx, topy);
+
+    // Animation
+    if(s->animTimer > 0) {
+
+        // Draw disappearing tile
+        if(s->animMode == 1 || s->animMode == 2) {
+
+            skip = s->animTimer / ANIM_SKIP;
+            if(skip > 0) {
+
+                fill_rect(topx + s->animPos.x*16, topy + s->animPos.y*16, 
+                    16, 16, 0);
+
+                // Draw boulder behind if a frozen boulder
+                if(s->animMode == 2) {
+
+                    draw_bitmap_region(s->bmpTileset, 112,0, 16, 16,
+                        topx + s->animPos.x*16, topy + s->animPos.y*16,
+                        false);
+                }
+
+                // Draw the disappearing tile
+                stage_draw_static(s, s->animPos.x, s->animPos.y, 
+                    s->animPos.x, s->animPos.y,
+                    topx, topy , skip);
+            }
+        }
+
+        // Draw item animation
+        if(s->animFrame >= 0) {
+
+            skip = 3 - (s->animTimer/ANIM_SKIP);
+            if(skip < 0) skip = 0;
+            else if(skip > 2) skip = 2;
+
+            draw_bitmap_region(s->bmpAnim, 
+                (s->animFrame+skip)*16, s->pl.spr.row*16, 16, 16,
+                topx + s->animPos.x*16, topy + s->animPos.y*16,
+                s->pl.flip);
+        }
+    }
 
     // Draw player
     pl_draw(&s->pl, (void*)s, topx, topy);
@@ -616,6 +634,7 @@ void stage_update_tile(Stage* s, uint8 x, uint8 y, uint8 value) {
     if(s->data[y*s->width+x] == 4 && value == 0) {
 
         stage_set_animation(s, 4, x, y);
+        s->animFrame = -1;
         return;
     }
 
@@ -679,12 +698,14 @@ void stage_item_collision(Player* pl, Stage* s) {
 
 
 // Activation event
-void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
+boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
     uint16 i;
     uint16 j = ty * s->width + tx;
     uint8 t = s->solid[j];
     int16 dif;
+    
+    s->animFrame = -1;
 
     // Switch
     switch (t)
@@ -737,6 +758,8 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             -- pl->keys;
             pl->itemsChanged = true;
+
+            return true;
         }
         break;
 
@@ -751,6 +774,10 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             -- pl->pickaxe;
             pl->itemsChanged = true;
+
+            s->animFrame = 0;
+
+            return true;
         }
         break;
 
@@ -764,12 +791,18 @@ void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             -- pl->shovel;
             pl->itemsChanged = true;
+
+            s->animFrame = 3;
+
+            return true;
         }
         break;
 
     default:
         break;
     }
+
+    return false;
 }
 
 

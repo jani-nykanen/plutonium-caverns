@@ -22,6 +22,7 @@ typedef struct {
     Bitmap* bmpFrame;
     Bitmap* bmpTileset;
     Bitmap* bmpItems;
+    Bitmap* bmpAnim;
 
     // Map
     Tilemap* tmap;
@@ -47,6 +48,7 @@ typedef struct {
     int8 animTimer;
     uint8 animMode;
     Byte2 animPos;
+    int8 animFrame;
 
 } Stage;
 
@@ -83,7 +85,7 @@ uint8 stage_get_tile_data(Stage* s, uint8 x, uint8 y);
 void stage_item_collision(Player* pl, Stage* s);
 
 // Activation event
-void stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s);
+boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s);
 
 // Set animation
 void stage_set_animation(Stage* s, uint8 mode, uint8 x, uint8 y);

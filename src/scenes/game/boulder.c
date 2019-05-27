@@ -146,8 +146,8 @@ void boulder_draw(Boulder* b, int dx, int dy) {
     y = b->target.y*16;
     if(b->moving) {
 
-        x += (b->pos.x-b->target.x)*b->moveTimer;
-        y += (b->pos.y-b->target.y)*b->moveTimer;
+        x += (b->pos.x-b->target.x)*(b->moveTimer/2);
+        y += (b->pos.y-b->target.y)*(b->moveTimer/2);
 
     }
     draw_bitmap_region(bmpTileset, 112, 0, 16, 16,

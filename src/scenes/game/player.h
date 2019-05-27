@@ -21,6 +21,7 @@ typedef struct
     // Rendering flags
     boolean redraw;
     boolean flip;
+    boolean acting;
     // Other flags
     boolean itemsChanged;
 

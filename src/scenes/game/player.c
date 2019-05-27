@@ -13,7 +13,7 @@
 #include "stage.h"
 
 // Constants
-static const int8 MOVE_TIME = 16;
+static const int8 MOVE_TIME = 32;
 
 // Bitmaps
 static Bitmap* bmpPlayer;
@@ -92,7 +92,12 @@ static void pl_control(Player* pl, Stage* s) {
         // Otherwise activate possibly solid tile
         else if(state == 1) {
 
-            stage_activate_tile(pl, tx, ty, s);
+            if(stage_activate_tile(pl, tx, ty, s)) {
+
+                pl->acting = true;
+                pl->direction = dir;
+                pl->flip = flip;
+            }
         }
     }
 }
@@ -102,6 +107,16 @@ static void pl_control(Player* pl, Stage* s) {
 static void pl_animate(Player* pl, int steps) {
 
     const int16 ANIM_SPEED = 8;
+
+    // "Acting"
+    if(pl->acting) {
+
+        pl->redraw = true;  
+        pl->spr.frame = 4;
+        pl->spr.row = min_int16(pl->direction, 2);
+        pl->acting = false;
+        return;
+    }
 
     if(pl->moving) {
 
@@ -143,6 +158,7 @@ Player create_player(uint8 x, uint8 y) {
     pl.moveTimer = 0;
     pl.redraw = true;
     pl.flip = false;
+    pl.acting = false;
 
     pl.itemsChanged = true;
 
@@ -197,8 +213,8 @@ void pl_draw(Player* pl, void* _s,  int dx, int dy) {
     y = pl->target.y*16;
     if(pl->moving) {
 
-        x += (pl->pos.x-pl->target.x)*pl->moveTimer;
-        y += (pl->pos.y-pl->target.y)*pl->moveTimer;
+        x += (pl->pos.x-pl->target.x)*(pl->moveTimer/2);
+        y += (pl->pos.y-pl->target.y)*(pl->moveTimer/2);
 
     }
 
