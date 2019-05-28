@@ -19,10 +19,12 @@ typedef struct
     boolean isBomb;
     boolean exist;
     boolean redraw;
+    boolean oldPlayerMoveState;
 
     // Movement
     uint8 moveTimer;
     boolean moving;
+    int8 bombTimer;
 
 } Boulder;
 

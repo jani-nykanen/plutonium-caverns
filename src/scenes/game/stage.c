@@ -88,6 +88,103 @@ static void draw_box_frame(Bitmap* bmp,
 }
 
 
+// Draw animation
+static void stage_draw_animation(Stage* s, int16 topx, int16 topy) {
+
+    int16 sx, sy, sw, sh, dx, dy;
+    int16 skip;
+
+    
+    // Draw disappearing tile
+    if(s->animMode == 1 || s->animMode == 2) {
+
+        skip = s->animTimer / ANIM_SKIP;
+        if(skip > 0) {
+
+            fill_rect(topx + s->animPos.x*16, topy + s->animPos.y*16, 
+                16, 16, 0);
+
+            // Draw boulder behind if a frozen boulder
+            if(s->animMode == 2) {
+
+                draw_bitmap_region(s->bmpTileset, 112,0, 16, 16,
+                    topx + s->animPos.x*16, topy + s->animPos.y*16,
+                    false);
+            }
+
+            // Draw the disappearing tile
+            stage_draw_static(s, s->animPos.x, s->animPos.y, 
+                s->animPos.x, s->animPos.y,
+                topx, topy , skip);
+        }
+    }
+    // Explosion
+    else if(s->animMode == 5) {
+
+        // Draw background
+        dx = (int16)(s->animPos.x)-1;
+        dy = (int16)(s->animPos.y)-1;
+        sw = dx + 2;
+        sh = dy + 2;
+        if(dx < 0) dx = 0; if(sw > s->width-1) sw = s->width-1;
+        if(dy < 0) dy = 0; if(sh > s->height-1) sh = s->height-1;
+        stage_draw_static(s, 
+            dx, dy,
+            sw, sh,
+            topx, topy, 0);
+
+        // Re-draw the player
+        s->pl.redraw = true;
+        pl_draw(&s->pl, NULL, topx, topy);
+
+        // Draw explosion
+        skip = 4 - s->animTimer / ANIM_SKIP;
+        switch (skip)
+        {
+            case 0:
+                sx = 0; sy = 0;
+                dx = -8; dy = -8;
+                sw = 16; sh = 16;
+                break;
+            case 1:
+                sx = 16; sy = 0;
+                dx = -16; dy = -16;
+                sw = 32; sh = 32;
+                break;
+            case 2:
+                sx = 48; sy = 0;
+                dx = -24; dy = -24;
+                sw = 48; sh = 48;
+                break;
+            case 3:
+                sx = 96; sy = 0;
+                dx = -24; dy = -24;
+                sw = 48; sh = 48;
+                break;
+            
+            default:
+                break;
+        }
+        draw_bitmap_region(s->bmpExp,   
+            sx, sy, sw, sh,
+            topx+s->animPos.x*16+8 + dx,
+            topy+s->animPos.y*16+8 + dy, false);
+    }
+
+    // Draw item animation
+    if(s->animFrame >= 0) {
+
+        skip = 3 - (s->animTimer/ANIM_SKIP);
+        if(skip < 0) skip = 0;
+        else if(skip > 2) skip = 2;
+
+        draw_bitmap_region(s->bmpAnim, 
+            (s->animFrame+skip)*16, s->pl.spr.row*16, 16, 16,
+            topx + s->animPos.x*16, topy + s->animPos.y*16,
+            s->pl.flip);
+    }     
+}
+
 // Draw lava
 static void stage_draw_lava(Stage* s, int dx, int dy) {
 
@@ -133,7 +230,7 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
 
 
 // Add a boulder
-static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
+static void stage_add_boulder(Stage* s, uint8 x, uint8 y, boolean makeBomb) {
 
     uint8 i = 0;
     // Find the first boulder that does
@@ -142,7 +239,7 @@ static void stage_add_boulder(Stage* s, uint8 x, uint8 y) {
 
         if(!s->boulders[i].exist) {
 
-            s->boulders[i] = create_boulder(x, y, false);
+            s->boulders[i] = create_boulder(x, y, makeBomb);
             s->solid[y*s->width+x] = 2;
             break;
         }
@@ -166,7 +263,7 @@ static void stage_parse_objects(Stage* s) {
             // Boulder
             if(t == 5) {
 
-                stage_add_boulder(s, x, y);
+                stage_add_boulder(s, x, y, false);
                 s->data[y*s->width+x] = 0;
             }
             // Player
@@ -245,6 +342,11 @@ static void stage_set_solid(Stage* s) {
             case 3:
                 t = 7;
                 break;
+
+            // Bomb place
+            case 6:
+                t = 8;
+                break;
             
             default:
                 break;
@@ -271,6 +373,7 @@ Stage* create_stage() {
     s->bmpTileset = (Bitmap*)get_asset("tileset");
     s->bmpItems = (Bitmap*)get_asset("items");
     s->bmpAnim = (Bitmap*)get_asset("anim");
+    s->bmpExp = (Bitmap*)get_asset("exp");
 
     return s;
 }
@@ -308,7 +411,7 @@ int stage_init(Stage* s, const char* mapPath) {
         s->solid[i] = 0;
 
         // If boulder
-        if(tileid == 5 || tileid == 3) {
+        if(tileid == 5 || tileid == 3 || tileid == 6) {
 
             ++ s->bcount;
         }
@@ -371,7 +474,9 @@ void stage_update(Stage* s, int steps) {
         if(s->animTimer <= 0) {
 
             s->animTimer = 0;
-            s->data[s->animPos.y*s->width+s->animPos.x] = 0;
+
+            if(s->animMode != 5)
+                s->data[s->animPos.y*s->width+s->animPos.x] = 0;
 
             // Make sure the player is not moving
             s->pl.moving = false;
@@ -382,7 +487,7 @@ void stage_update(Stage* s, int steps) {
             // boulder
             if(s->animMode == 2) {
 
-                stage_add_boulder(s, s->animPos.x, s->animPos.y);
+                stage_add_boulder(s, s->animPos.x, s->animPos.y, false);
             }
         }
 
@@ -409,7 +514,6 @@ void stage_draw(Stage* s) {
     uint8 i;
     int16 topx = s->topLeft.x;
     int16 topy = s->topLeft.y;
-    int16 skip;
 
     toggle_clipping(false);
 
@@ -444,46 +548,9 @@ void stage_draw(Stage* s) {
     // Draw lava
     stage_draw_lava(s, topx, topy);
 
-    // Animation
-    if(s->animTimer > 0) {
-
-        // Draw disappearing tile
-        if(s->animMode == 1 || s->animMode == 2) {
-
-            skip = s->animTimer / ANIM_SKIP;
-            if(skip > 0) {
-
-                fill_rect(topx + s->animPos.x*16, topy + s->animPos.y*16, 
-                    16, 16, 0);
-
-                // Draw boulder behind if a frozen boulder
-                if(s->animMode == 2) {
-
-                    draw_bitmap_region(s->bmpTileset, 112,0, 16, 16,
-                        topx + s->animPos.x*16, topy + s->animPos.y*16,
-                        false);
-                }
-
-                // Draw the disappearing tile
-                stage_draw_static(s, s->animPos.x, s->animPos.y, 
-                    s->animPos.x, s->animPos.y,
-                    topx, topy , skip);
-            }
-        }
-
-        // Draw item animation
-        if(s->animFrame >= 0) {
-
-            skip = 3 - (s->animTimer/ANIM_SKIP);
-            if(skip < 0) skip = 0;
-            else if(skip > 2) skip = 2;
-
-            draw_bitmap_region(s->bmpAnim, 
-                (s->animFrame+skip)*16, s->pl.spr.row*16, 16, 16,
-                topx + s->animPos.x*16, topy + s->animPos.y*16,
-                s->pl.flip);
-        }
-    }
+    // Draw animation
+    if(s->animTimer > 0)
+        stage_draw_animation(s, topx, topy);
 
     // Draw player
     pl_draw(&s->pl, (void*)s, topx, topy);
@@ -798,6 +865,25 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
         }
         break;
 
+    // Bomb place
+    case 8:
+    {   
+
+        if(pl->bombs > 0) {
+            // Add a bomb
+            stage_add_boulder(s, tx, ty, true);
+            stage_update_solid(s, tx, ty, 0);
+            stage_update_tile(s, tx, ty, 0);
+
+            pl->forceRelease = true;
+            -- pl->bombs;
+            pl->itemsChanged = true;
+
+            return true;
+        }
+        break;
+    }
+
     default:
         break;
     }
@@ -812,4 +898,54 @@ void stage_set_animation(Stage* s, uint8 mode, uint8 x, uint8 y) {
     s->animMode = mode;
     s->animTimer = INITIAL_ANIM_TIME;
     s->animPos = byte2(x, y);
+}
+
+
+// Detonate a bbomb
+void stage_detonate(Stage* s, uint8 dx, uint8 dy) {
+
+    uint8 x, y;
+    uint8 t;
+    int16 p;
+
+    for(y = dy-1; y <= dy+1; ++ y) {
+
+        for(x = dx-1; x <= dx+1; ++ x) {
+
+            // Do not destroy the borders
+            // or the tile under the bomb
+            if(x == 0 || y == 0 || 
+               x == s->width-1 || y == s->height-1)
+                continue;
+
+            p = y*s->width+x;
+            t = s->data[p];
+            switch (t)
+            {
+            // Wall or solid color block
+            case 1:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                s->data[p] = 4;
+                s->solid[p] = 3;
+                break;
+
+            // Ice
+            case 2:
+            case 3:
+                s->data[p] = 0;
+                s->solid[p] = 0;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    // Set animation
+    stage_set_animation(s, 5, dx, dy);
+
 }

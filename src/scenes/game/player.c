@@ -12,6 +12,8 @@
 
 #include "stage.h"
 
+#include <stdlib.h>
+
 // Constants
 static const int8 MOVE_TIME = 32;
 
@@ -23,7 +25,7 @@ static Bitmap* bmpPlayer;
 static bool pl_check_free_tile(Player* pl, Stage* s, uint8 tx, uint8 ty) {
 
     uint8 t = stage_get_solid_data(s, tx, ty);
-    return t == 0 || t == 2;
+    return t == 0 || t == 2 || t == 8;
 }
 
 
@@ -71,6 +73,18 @@ static void pl_control(Player* pl, Stage* s) {
         dir = 0;
     }
 
+    if(pl->forceRelease) {
+
+        if(state == 1) {
+
+            pl->forceRelease = false;
+        }
+        else {
+
+            return;
+        }
+    }
+
     // If movement
     if(tx != pl->pos.x || ty != pl->pos.y) {
 
@@ -97,6 +111,19 @@ static void pl_control(Player* pl, Stage* s) {
                 pl->acting = true;
                 pl->direction = dir;
                 pl->flip = flip;
+            }
+        }
+
+        // Special check, if a bombing place
+        if(stage_get_solid_data(s, tx, ty) == 8) {
+
+            if(stage_activate_tile(pl, tx, ty, s)) {
+
+                pl->moving = false;
+                pl->moveTimer = 0;
+                pl->target = pl->pos;
+
+                pl->forceRelease = true;
             }
         }
     }
@@ -159,6 +186,7 @@ Player create_player(uint8 x, uint8 y) {
     pl.redraw = true;
     pl.flip = false;
     pl.acting = false;
+    pl.forceRelease = false;
 
     pl.itemsChanged = true;
 
@@ -183,7 +211,7 @@ void pl_update(Player* pl, void* _s, int steps) {
     // Update move timer
     if(pl->moveTimer > 0) {
 
-        pl->moveTimer -= 1 * steps;
+        pl->moveTimer -= 2 * steps;
         pl->redraw = true;
 
         if(pl->moveTimer <= 0) {
@@ -218,9 +246,12 @@ void pl_draw(Player* pl, void* _s,  int dx, int dy) {
 
     }
 
-     // Redraw bottom tiles
-    stage_draw_static(s, pl->pos.x-1, pl->pos.y-1, 
-        pl->pos.x+1, pl->pos.y+1, dx, dy, 0);
+    if(s != NULL) {
+
+        // Redraw bottom tiles
+        stage_draw_static(s, pl->pos.x-1, pl->pos.y-1, 
+            pl->pos.x+1, pl->pos.y+1, dx, dy, 0);
+    }
 
     // Draw sprite
     spr_draw(&pl->spr, bmpPlayer, 

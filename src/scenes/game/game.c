@@ -118,7 +118,8 @@ static int16 game_init() {
         BITMAP("ASSETS/BITMAPS/TILESET.BIN", "tileset") ||
         BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||
         BITMAP("ASSETS/BITMAPS/ITEMS.BIN", "items") ||
-        BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player")
+        BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player") ||
+        BITMAP("ASSETS/BITMAPS/EXP.BIN", "exp")
     ) {
 
         return 1;

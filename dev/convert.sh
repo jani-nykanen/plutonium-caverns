@@ -19,6 +19,8 @@ fi
 ../tools/png2bin bitmaps/anim.png ../ASSETS/BITMAPS/ANIM.BIN
 ../tools/png2bin bitmaps/player.png ../ASSETS/BITMAPS/PLAYER.BIN
 ../tools/png2bin bitmaps/frame.png ../ASSETS/BITMAPS/FRAME.BIN
+../tools/png2bin bitmaps/explosion.png ../ASSETS/BITMAPS/EXP.BIN
+
 
 # Maps
 ../tools/tmx2bin maps/0.tmx ../ASSETS/MAPS/0.BIN

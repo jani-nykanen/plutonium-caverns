@@ -15,6 +15,7 @@
 
 // Bitmaps
 static Bitmap* bmpTileset;
+static Bitmap* bmpItems;
 
 
 // Initialize boulders
@@ -22,6 +23,7 @@ void init_boulders() {
 
     // Get bitmaps
     bmpTileset = (Bitmap*)get_asset("tileset");
+    bmpItems = (Bitmap*)get_asset("items");
 }
 
 
@@ -33,12 +35,14 @@ Boulder create_boulder(uint8 x, uint8 y, bool makeBomb) {
     b.pos.y = y;
     b.target = b.pos;
     b.isBomb = makeBomb;
+    b.bombTimer = 5;
 
     // Set defaults
     b.moving = false;
     b.moveTimer = 0;
     b.redraw = true;    
     b.exist = true;
+    b.oldPlayerMoveState = false;
 
     return b;
 }
@@ -131,6 +135,23 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
         } 
 
     }
+
+    // Check if a turn has passed
+    if(b->isBomb && pl->moving && !b->oldPlayerMoveState) {
+
+        b->redraw = true;
+        -- b->bombTimer;
+    }
+    // Detonate
+    if(b->bombTimer <= 0 && !pl->moving) {
+
+        b->exist = false;
+        // Detonate
+        stage_detonate(s, b->pos.x, b->pos.y);
+        return;
+    }
+
+    b->oldPlayerMoveState = pl->moving;
 }
 
 
@@ -150,8 +171,18 @@ void boulder_draw(Boulder* b, int dx, int dy) {
         y += (b->pos.y-b->target.y)*(b->moveTimer/2);
 
     }
-    draw_bitmap_region(bmpTileset, 112, 0, 16, 16,
-        dx + x, dy + y, false);
+
+    if(!b->isBomb) {
+
+        draw_bitmap_region(bmpTileset, 112, 0, 16, 16,
+            dx + x, dy + y, false);
+    }
+    else {
+
+        draw_bitmap_region(bmpItems, 
+            (5-b->bombTimer)*16, 16, 16, 16,
+            dx + x, dy + y, false);
+    }
 
     b->redraw = false;
 }
