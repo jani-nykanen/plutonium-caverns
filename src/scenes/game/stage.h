@@ -97,4 +97,7 @@ void stage_detonate(Stage* s, uint8 x, uint8 y);
 // Reset
 void stage_reset(Stage* s);
 
+// Redraw
+void stage_redraw(Stage* s);
+
 #endif // __STAGE__

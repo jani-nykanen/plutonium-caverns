@@ -62,7 +62,7 @@ static void far interrupt handler() {
 
             oldExt[scancode] = extKeys[scancode];
             extKeys[scancode] = makeBreak;
-            
+
             if(extKeys[scancode] != oldExt[scancode])
                 extRead[scancode] = false;
         }

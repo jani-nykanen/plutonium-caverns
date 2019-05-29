@@ -9,7 +9,7 @@ int16 neg_mod(int16 m, int16 n) {
 
     if(m < 0) {
 
-        return n - (-m % n) -1;
+        return n - (-m % n);
     }
     return m % n;
 }

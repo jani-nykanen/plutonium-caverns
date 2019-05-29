@@ -13,6 +13,8 @@
 #include "../../core/assets.h"
 #include "../../core/transition.h"
 
+#include "../../menu.h"
+
 #include "stage.h"
 
 // Game scene name
@@ -24,10 +26,10 @@ static Bitmap* bmpItems;
 
 // Game components
 static Stage* stage;
+static Menu pauseMenu;
 
 // Render flags
 static boolean redrawHUD;
-
 
 // Draw an energy bar
 static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
@@ -43,6 +45,47 @@ static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
             x+i*9, 
             y+1);
     }
+}
+
+
+// Reset callback
+static void cb_reset_stage() {
+
+    redrawHUD = true;
+    stage_reset(stage);
+}
+
+
+// Menu callbacks
+static void cb_resume() {
+
+    pauseMenu.active = false;
+    stage_redraw(stage);
+}
+static void cb_reset() {
+
+    pauseMenu.active = false;
+    stage_redraw(stage);
+    tr_activate(FadeIn, 2, cb_reset_stage);
+    
+}
+static void cb_audio() {}
+static void cb_quit() {
+    pauseMenu.active = false;
+    stage_redraw(stage);
+    tr_activate(FadeIn, 2, app_terminate);
+}
+// Create pause menu
+static void game_create_pause_menu() {
+
+    // Create menu
+    pauseMenu = create_menu();
+    
+    // Add buttons
+    menu_add_button(&pauseMenu, "RESUME", cb_resume);
+    menu_add_button(&pauseMenu, "RESTART", cb_reset);
+    menu_add_button(&pauseMenu, "AUDIO: ON", cb_audio);
+    menu_add_button(&pauseMenu, "QUIT", cb_quit);
 }
 
 
@@ -85,18 +128,14 @@ static int16 game_init() {
     // Set defaults
     redrawHUD = true;
 
+    // Create pause menu
+    game_create_pause_menu();
+
     // Set transition
     tr_activate(FadeOut, 2, NULL);
 
     return 0;
 }
-
-
-// Reset callback
-static void cb_reset() {
-
-    stage_reset(stage);
-}   
 
 
 // Update
@@ -105,22 +144,30 @@ static void game_update(int16 steps) {
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
 
-        app_terminate();
+        cb_quit();
+        return;
     }
 
     if(tr_is_active()) return;
 
-    // Reset stage
-    if(input_get_button(1) == StatePressed) {
+    // Check pause
+    if(pauseMenu.active) {
 
-        tr_activate(FadeIn, 2, cb_reset);
+        menu_update(&pauseMenu, steps);
+        return;
+    }
+    // Pause game
+    else if(input_get_button(2) == StatePressed) {
+
+        menu_activate(&pauseMenu, 0);
         return;
     }
 
-    // Palette swap (test)
-    if(input_get_button(0) == StatePressed) {
+    // Reset stage
+    if(input_get_button(1) == StatePressed) {
 
-        set_palette_darkness(1);
+        tr_activate(FadeIn, 2, cb_reset_stage);
+        return;
     }
 
     // Update stage
@@ -131,6 +178,15 @@ static void game_update(int16 steps) {
 // Draw 
 static void game_draw() {
 
+    if(pauseMenu.active) {
+
+        // Draw pause
+        menu_draw(&pauseMenu, 
+            stage->topLeft.x + stage->width*8, 
+            stage->topLeft.y + stage->height*8);
+        return;
+    }
+
     // Draw stage
     stage_draw(stage);
 
@@ -140,6 +196,7 @@ static void game_draw() {
         game_redraw_info(&stage->pl);
         redrawHUD = false;
     }
+
 }
 
 

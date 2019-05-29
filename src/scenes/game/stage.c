@@ -998,3 +998,19 @@ void stage_reset(Stage* s) {
     // Parse objects
     stage_parse_objects(s);
 }
+
+
+// Redraw
+void stage_redraw(Stage* s) {
+
+    int16 i;
+
+    // Set the render flags for the tiles
+    s->staticDrawn = false;
+    // Set render flags for the objects
+    s->pl.redraw = true;
+    for(i = 0; i < s->bcount; ++ i) {
+
+        s->boulders[i].redraw = true;
+    } 
+}
