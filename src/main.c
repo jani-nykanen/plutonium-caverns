@@ -25,10 +25,9 @@ void main() {
 
     // Add buttons
     input_add_button(0, 44);
-    input_add_button(1, 45);
-    input_add_button(2, 19);
-    input_add_button(3, 0x1C);
-    input_add_button(4, 1);
+    input_add_button(1, 19);
+    input_add_button(2, 0x1C);
+    input_add_button(3, 1);
 
     // Run application
     app_run();

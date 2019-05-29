@@ -32,78 +32,15 @@ static boolean redrawHUD;
 static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
 
     uint8 i;
+    int16 sx = 3 + val*16;
     // Draw corresponding enery bars
     for(i = 0; i < max; ++ i) {
 
         draw_bitmap_region_fast(bmpItems, 
-            (i < val ? 19 : 3), 33,
+            (i < val ? sx : 3), 33,
             10, 14, 
             x+i*9, 
             y+1);
-    }
-}
-
-
-// Draw HUD
-static void game_draw_hud() {
-
-    const int TOP_X = 24*8+24;
-    const int TOP_Y = 24;
-    const int FRAME_WIDTH = 80;
-
-    const int ITEM_START_Y = 28;
-    const int ITEM_X = 4;
-    const int ITEM_OFF_X = 20;
-    const int ITEM_OFF_Y = 22;
-
-    const int BAR_MAX = 5;
-
-    uint8 i = 0;
-    char buf[8];
-
-    // Draw stage name
-    draw_text_fast(bmpFont, "STAGE 1", 
-        TOP_X + FRAME_WIDTH/2, TOP_Y+8,0,0, true);
-
-    // Draw consumable item icons
-    draw_bitmap_region_fast(bmpItems, 16, 0, 16, 16,
-        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y);
-    draw_bitmap_region_fast(bmpItems, 32, 0, 16, 16,
-        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y);
-
-    // Draw corresponding energy bars
-    draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
-        TOP_Y+ITEM_START_Y+1, 
-        BAR_MAX, stage->pl.pickaxe);
-    draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
-        TOP_Y+ITEM_START_Y+ITEM_OFF_Y+1, 
-        BAR_MAX, stage->pl.shovel);
-
-    // Draw collectable item icons
-    draw_bitmap_region_fast(bmpItems, 0, 0, 16, 16,
-        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2);
-    draw_bitmap_region_fast(bmpItems, 48, 0, 16, 16,
-        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3);
-
-    // Draw collectable item counts
-    snprintf(buf, 8, "\2%d", (int16)stage->pl.keys);
-    draw_text_fast(bmpFont, buf, 
-        TOP_X+ITEM_X+ITEM_OFF_X, 
-        TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2 +4, 
-        0, 0, false);
-    snprintf(buf, 8, "\2%d", (int16)stage->pl.bombs);
-    draw_text_fast(bmpFont, buf, 
-        TOP_X+ITEM_X+ITEM_OFF_X, 
-        TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3 +4, 
-        0, 0, false);
-
-    // Draw gems
-    for(i = 0; i < stage->pl.maxGems; ++ i) {
-
-        draw_bitmap_region_fast(bmpItems, 
-            i < stage->pl.gems ? 64 : 80, 0, 16, 16,
-            TOP_X+ITEM_X+i*ITEM_OFF_X, 
-            TOP_Y+ITEM_START_Y+ITEM_OFF_Y*4);
     }
 }
 
@@ -155,9 +92,16 @@ static int16 game_init() {
 static void game_update(int16 steps) {
 
     // Quit (TEMPORARY!)
-    if(input_get_button(4) == StatePressed) {
+    if(input_get_button(3) == StatePressed) {
 
         app_terminate();
+    }
+
+    // Reset stage
+    if(input_get_button(1) == StatePressed) {
+
+        stage_reset(stage);
+        return;
     }
 
     // Update stage
@@ -171,11 +115,11 @@ static void game_draw() {
     // Draw stage
     stage_draw(stage);
 
-    // Draw HUD
-    if(stage->pl.itemsChanged) {
+    // (Re)draw info
+    if(redrawHUD) {
 
-        game_draw_hud();
-        stage->pl.itemsChanged = false;
+        game_redraw_info(&stage->pl);
+        redrawHUD = false;
     }
 }
 
@@ -198,4 +142,68 @@ Scene game_get_scene() {
     s.name = GAME_SCENE_NAME;
 
     return s;
+}
+
+
+// Draw info
+void game_redraw_info(Player* pl) {
+
+    const int TOP_X = 24*8+24;
+    const int TOP_Y = 24;
+    const int FRAME_WIDTH = 80;
+
+    const int ITEM_START_Y = 28;
+    const int ITEM_X = 4;
+    const int ITEM_OFF_X = 20;
+    const int ITEM_OFF_Y = 22;
+
+    const int BAR_MAX = 5;
+
+    uint8 i = 0;
+    char buf[8];
+
+    // Draw stage name
+    draw_text_fast(bmpFont, "STAGE 1", 
+        TOP_X + FRAME_WIDTH/2, TOP_Y+8,0,0, true);
+
+    // Draw consumable item icons
+    draw_bitmap_region_fast(bmpItems, 16, 0, 16, 16,
+        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y);
+    draw_bitmap_region_fast(bmpItems, 32, 0, 16, 16,
+        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y);
+
+    // Draw corresponding energy bars
+    draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
+        TOP_Y+ITEM_START_Y+1, 
+        BAR_MAX, pl->pickaxe);
+    draw_energy_bar(TOP_X+ITEM_X+ITEM_OFF_X, 
+        TOP_Y+ITEM_START_Y+ITEM_OFF_Y+1, 
+        BAR_MAX, pl->shovel);
+
+    // Draw collectable item icons
+    draw_bitmap_region_fast(bmpItems, 0, 0, 16, 16,
+        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2);
+    draw_bitmap_region_fast(bmpItems, 48, 0, 16, 16,
+        TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3);
+
+    // Draw collectable item counts
+    snprintf(buf, 8, "\2%d", (int16)pl->keys);
+    draw_text_fast(bmpFont, buf, 
+        TOP_X+ITEM_X+ITEM_OFF_X, 
+        TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2 +4, 
+        0, 0, false);
+    snprintf(buf, 8, "\2%d", (int16)pl->bombs);
+    draw_text_fast(bmpFont, buf, 
+        TOP_X+ITEM_X+ITEM_OFF_X, 
+        TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3 +4, 
+        0, 0, false);
+
+    // Draw gems
+    for(i = 0; i < pl->maxGems; ++ i) {
+
+        draw_bitmap_region_fast(bmpItems, 
+            i < pl->gems ? 64 : 80, 0, 16, 16,
+            TOP_X+ITEM_X+i*ITEM_OFF_X, 
+            TOP_Y+ITEM_START_Y+ITEM_OFF_Y*4);
+    }
 }

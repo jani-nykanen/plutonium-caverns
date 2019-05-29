@@ -156,7 +156,7 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
 
 
 // Draw
-void boulder_draw(Boulder* b, int dx, int dy) {
+void boulder_draw(Boulder* b, int16 dx, int16 dy) {
 
     int16 x, y;
 
@@ -185,4 +185,20 @@ void boulder_draw(Boulder* b, int dx, int dy) {
     }
 
     b->redraw = false;
+}
+
+
+// Check detonation
+void boulder_check_detonation(Boulder* b, void* _s, uint8 dx, uint8 dy) {
+
+    Stage* s = (Stage*)_s;
+
+    if(!b->exist) return;
+
+    if(b->pos.x >= dx-1 && b->pos.x <= dx+1 &&
+       b->pos.y >= dy-1 && b->pos.y <= dy+1) {
+
+        b->exist = false;
+        stage_update_solid(s, b->pos.x, b->pos.y, 0);
+    }
 }

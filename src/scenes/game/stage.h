@@ -91,7 +91,10 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s);
 // Set animation
 void stage_set_animation(Stage* s, uint8 mode, uint8 x, uint8 y);
 
-// Detonate a bbomb
+// Detonate a bomb
 void stage_detonate(Stage* s, uint8 x, uint8 y);
+
+// Reset
+void stage_reset(Stage* s);
 
 #endif // __STAGE__

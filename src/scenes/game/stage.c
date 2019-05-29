@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "game.h"
+
 // Initial animation time
 static const int8 INITIAL_ANIM_TIME = 32;
 static const int8 ANIM_SKIP = 8;
@@ -759,7 +761,7 @@ void stage_item_collision(Player* pl, Stage* s) {
     if(remove) {
 
         s->data[pl->pos.y*s->width+pl->pos.x] = 0;
-        pl->itemsChanged = true;
+        game_redraw_info(&s->pl);
     }
 }
 
@@ -824,7 +826,7 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             stage_set_animation(s, 1, tx, ty);
 
             -- pl->keys;
-            pl->itemsChanged = true;
+            game_redraw_info(pl);
 
             return true;
         }
@@ -840,7 +842,7 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             stage_set_animation(s, t == 5 ? 1 : 2, tx, ty);
 
             -- pl->pickaxe;
-            pl->itemsChanged = true;
+            game_redraw_info(pl);
 
             s->animFrame = 0;
 
@@ -857,7 +859,7 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             stage_set_animation(s, 4, tx, ty);
 
             -- pl->shovel;
-            pl->itemsChanged = true;
+            game_redraw_info(pl);
 
             s->animFrame = 3;
 
@@ -877,7 +879,8 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             pl->forceRelease = true;
             -- pl->bombs;
-            pl->itemsChanged = true;
+            
+            game_redraw_info(pl);
 
             return true;
         }
@@ -907,6 +910,7 @@ void stage_detonate(Stage* s, uint8 dx, uint8 dy) {
     uint8 x, y;
     uint8 t;
     int16 p;
+    int16 i;
 
     for(y = dy-1; y <= dy+1; ++ y) {
 
@@ -945,7 +949,52 @@ void stage_detonate(Stage* s, uint8 dx, uint8 dy) {
         }
     }
 
+    // Destroy boulders, if nearby
+    // Draw boulders
+    for(i = 0; i < s->bcount; ++ i) {
+
+        boulder_check_detonation(&s->boulders[i], (void*)s, dx, dy);
+    } 
+
     // Set animation
     stage_set_animation(s, 5, dx, dy);
 
+}
+
+
+// Reset
+void stage_reset(Stage* s) {
+
+    int16 i;
+    uint8 tileid;
+
+    // Reset tile & solid data
+    for(i = 0; i < s->width*s->height; ++ i) {
+
+        tileid =  (uint8)max_int16(s->tmap->layers[0] [i+s->tmap->width], 16) -16;
+        s->data[i] = tileid;
+        s->solid[i] = 0;
+
+    }
+
+    // Set defaults
+    s->staticDrawn = false;
+    s->lavaTimer = 0;
+    s->lavaGlowTimer = 0;
+    s->animTimer = 0;
+    s->animPos = byte2(0, 0);
+    s->animMode = 0;
+    s->topLeft = vec2(24, 16);
+
+    // Make bouldesr inactive
+    for(i = 0; i < s->bcount; ++ i) {
+
+        s->boulders[i].exist = false;
+    }
+
+    // Set solid data
+    stage_set_solid(s);
+
+    // Parse objects
+    stage_parse_objects(s);
 }

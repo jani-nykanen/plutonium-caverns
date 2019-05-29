@@ -35,10 +35,12 @@ void init_boulders();
 Boulder create_boulder(uint8 x, uint8 y, bool makeBomb);
 
 // Update boulder
-// TODO: (void*) => Player*
 void boulder_update(Boulder* b, void* pl, void* s, int steps);
 
 // Draw
-void boulder_draw(Boulder* b, int dx, int dy);
+void boulder_draw(Boulder* b, int16 dx, int16 dy);
+
+// Check detonation
+void boulder_check_detonation(Boulder* b, void* _s, uint8 dx, uint8 dy);
 
 #endif // __BOULDER__

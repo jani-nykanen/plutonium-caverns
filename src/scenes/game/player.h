@@ -23,7 +23,6 @@ typedef struct
     boolean flip;
     boolean acting;
     // Other flags
-    boolean itemsChanged;
     boolean forceRelease;
 
     // Item info

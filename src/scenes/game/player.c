@@ -188,8 +188,6 @@ Player create_player(uint8 x, uint8 y) {
     pl.acting = false;
     pl.forceRelease = false;
 
-    pl.itemsChanged = true;
-
     return pl;
 }
 
