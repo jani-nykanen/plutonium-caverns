@@ -8,6 +8,7 @@
 #include "graphics.h"
 #include "input.h"
 #include "assets.h"
+#include "transition.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,6 +59,7 @@ int16 init_application() {
     }
     init_input();
     init_assets();
+    init_transition();
 
     // Set defaults params
     frameSkip = 1;
@@ -116,12 +118,18 @@ void app_run() {
             if(activeScene->update != NULL) {
 
                 activeScene->update(frameSkip +1);
+
+                // Update transition
+                tr_update(frameSkip +1);
             }
 
             // Draw
             if(activeScene->draw != NULL) {
 
                 activeScene->draw();
+
+                // Draw transition
+                tr_draw();
             }
         }
 

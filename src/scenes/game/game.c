@@ -11,6 +11,7 @@
 #include "../../core/input.h"
 #include "../../core/application.h"
 #include "../../core/assets.h"
+#include "../../core/transition.h"
 
 #include "stage.h"
 
@@ -84,8 +85,18 @@ static int16 game_init() {
     // Set defaults
     redrawHUD = true;
 
+    // Set transition
+    tr_activate(FadeOut, 2, NULL);
+
     return 0;
 }
+
+
+// Reset callback
+static void cb_reset() {
+
+    stage_reset(stage);
+}   
 
 
 // Update
@@ -97,11 +108,19 @@ static void game_update(int16 steps) {
         app_terminate();
     }
 
+    if(tr_is_active()) return;
+
     // Reset stage
     if(input_get_button(1) == StatePressed) {
 
-        stage_reset(stage);
+        tr_activate(FadeIn, 2, cb_reset);
         return;
+    }
+
+    // Palette swap (test)
+    if(input_get_button(0) == StatePressed) {
+
+        set_palette_darkness(1);
     }
 
     // Update stage

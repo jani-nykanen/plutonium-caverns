@@ -123,6 +123,35 @@ static bool clip(int16* sx, int16* sy, int16* sw, int16* sh,
 }
 
 
+// Compute dark value
+static uint8 get_dark_value(uint8 color, uint8 count) {
+
+    uint8 r, g, b;
+    int16 i;
+
+    r = color >> 5;
+    g = color << 3;
+    g = g >> 5;
+    b = color << 6;
+    b = b >> 6;
+
+    for(i = 0; i < count; ++ i) {
+
+        if(r>0) -- r;
+        if(g>0) -- g;
+                
+        if(i % 2 == 1) {
+
+            if(b > 0) 
+                --b;
+        }
+    }
+    r = r << 5;
+    g = g << 2;
+    
+    return r | g | b;
+}
+
 
 // Set palette
 static void set_palette() {
@@ -519,5 +548,30 @@ void draw_bitmap_region_skip(Bitmap* bmp,
         }
         boff += bmp->width-sw*dir;
         offset += frameDim.x-sw;
+    }
+}
+
+
+// Set palette darkness
+void set_palette_darkness(uint8 d) {
+
+    int16 i = 0;
+    uint8 j;
+
+    if(d == 0) {
+
+        set_palette();
+        return;
+    }
+
+    // Generate simple palette
+    outp(PALETTE_INDEX,0);
+    for(i = 0; i < 256 ;  ++ i) {
+
+        j = get_dark_value(i, d);
+
+        outp(PALETTE_DATA, PALETTE[j*3]/4);
+        outp(PALETTE_DATA, PALETTE[j*3 +1]/4);
+        outp(PALETTE_DATA, PALETTE[j*3 +2]/4);
     }
 }

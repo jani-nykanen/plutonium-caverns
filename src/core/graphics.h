@@ -76,4 +76,7 @@ void draw_bitmap_region_skip(Bitmap* bmp,
     int16 sx, int16 sy, int16 sw, int16 sh, int16 dx, int16 dy,
     int16 skip, bool flip);    
 
+// Set palette darkness
+void set_palette_darkness(uint8 d);
+
 #endif // __GRAPHICS_H__
