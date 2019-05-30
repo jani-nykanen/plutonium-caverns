@@ -14,6 +14,7 @@ typedef struct {
     void  (*update)  (int16);
     void  (*draw)    ();
     void  (*dispose) (void);
+    void  (*change) (void*);
 
     // Name
     const char* name;

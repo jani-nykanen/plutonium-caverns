@@ -13,6 +13,8 @@ int16 init_application();
 
 // Add a scene
 void app_add_scene(Scene s, bool makeActive);
+// Change scene
+void app_change_scene(const char* name, void* param);
 
 // Run
 void app_run();

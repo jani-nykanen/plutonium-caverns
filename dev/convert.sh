@@ -20,6 +20,7 @@ fi
 ../tools/png2bin bitmaps/player.png ../ASSETS/BITMAPS/PLAYER.BIN
 ../tools/png2bin bitmaps/frame.png ../ASSETS/BITMAPS/FRAME.BIN
 ../tools/png2bin bitmaps/explosion.png ../ASSETS/BITMAPS/EXP.BIN
+../tools/png2bin bitmaps/smenu.png ../ASSETS/BITMAPS/SMENU.BIN
 
 
 # Maps

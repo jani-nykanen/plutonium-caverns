@@ -6,6 +6,7 @@
 #include "core/err.h"
 
 #include "scenes/game/game.h"
+#include "scenes/stagemenu/stagemenu.h"
 
 #include <stdio.h>
 
@@ -22,6 +23,7 @@ void main() {
 
     // Add scenes
     app_add_scene(game_get_scene(), true);
+    app_add_scene(smenu_get_scene(), false);
 
     // Add buttons
     input_add_button(0, 44);

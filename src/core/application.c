@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 // Maximum amount of scenes
 #define MAX_SCENES 16
@@ -78,6 +79,26 @@ void app_add_scene(Scene s, bool makeActive) {
     if(makeActive)
         activeScene = &scenes[sceneCount-1];
 }   
+
+
+// Change scene
+void app_change_scene(const char* name, void* param) {
+
+    int16 i = 0;
+    for(; i < sceneCount; ++ i) {
+
+        if(strcmp(scenes[i].name, name) == 0) {
+
+            activeScene = &scenes[i];
+            if(activeScene->change != NULL) {
+
+                activeScene->change(param);
+            }
+
+            return;
+        }
+    }
+}
 
 
 // Run

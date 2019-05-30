@@ -54,7 +54,10 @@ static void cb_reset_stage() {
     redrawHUD = true;
     stage_reset(stage);
 }
-
+// Change scene callback
+static void cb_change() {
+    app_change_scene("smenu", NULL);
+}
 
 // Menu callbacks
 static void cb_resume() {
@@ -73,7 +76,7 @@ static void cb_audio() {}
 static void cb_quit() {
     pauseMenu.active = false;
     stage_redraw(stage);
-    tr_activate(FadeIn, 2, app_terminate);
+    tr_activate(FadeIn, 2, cb_change);
 }
 // Create pause menu
 static void game_create_pause_menu() {
@@ -207,6 +210,13 @@ static void game_dispose() {
 }
 
 
+// Change
+static void game_on_change(void* param) {
+
+    // ...
+}
+
+
 // Get game scene
 Scene game_get_scene() {
 
@@ -215,6 +225,7 @@ Scene game_get_scene() {
     s.update = game_update;
     s.draw = game_draw;
     s.dispose = game_dispose;
+    s.change = game_on_change;
     s.name = GAME_SCENE_NAME;
 
     return s;
