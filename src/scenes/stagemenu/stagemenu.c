@@ -6,25 +6,35 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "../../core/graphics.h"
 #include "../../core/input.h"
 #include "../../core/application.h"
 #include "../../core/assets.h"
 #include "../../core/transition.h"
+#include "../../core/mathext.h"
 
 // Scene name
 static const char* SMENU_SCENE_NAME = "smenu";
 
 // Constants
 static const uint16 STAGE_COUNT = 15;
+static const int16 ANIM_TIME = 120;
 
 // (Re)draw flags
 static boolean redrawBG;
 static boolean redrawMenu;
+static boolean fillOldCursorPos;
 
 // Planet cursor pos
 static Vector2 pcpos; 
+// Menu cursor position
+static Vector2 cpos;
+// Menu cursor old position
+static Vector2 opos;
+// Cursor animation timer
+static int16 animTimer;
 
 // Bitmaps
 static Bitmap* bmpSMenu;
@@ -65,6 +75,29 @@ static void smenu_draw_bg() {
 }
 
 
+// Draw menu cursor
+static void smenu_draw_cursor(int16 dx, int16 dy, 
+    int16 xoff, int16 yoff) {
+
+    // Compute animation positions
+    int16 animPos = abs(animTimer-ANIM_TIME/2);
+    animPos /= (ANIM_TIME/8);
+
+    // Hide old cursor
+    if(fillOldCursorPos) {
+
+        fill_rect(dx-20 + opos.x*xoff, dy-2 + opos.y*yoff, 
+            20, 16, 0);
+
+        fillOldCursorPos = false;
+    }
+
+    // Draw cursor
+    draw_bitmap_region_fast(bmpSMenu, 80, 0, 16, 16, 
+        dx-20+animPos + cpos.x*xoff, dy-2 + cpos.y*yoff);
+}
+
+
 // Draw menu
 static void smenu_draw_menu() {
 
@@ -87,24 +120,34 @@ static void smenu_draw_menu() {
 
     char buf [10];
 
-    // Draw a box around the header
-    fill_rect(bx-2, by-2, BOX_W+4, BOX_H+4, 146);
-    fill_rect(bx-1, by-1, BOX_W+2, BOX_H+2, 255);
-    fill_rect(bx, by, BOX_W, BOX_H, 0);
+    // Menu
+    if(redrawMenu) {
 
-    // Draw header
-    draw_text_fast(bmpFont, "CHOOSE A STAGE", 
-        HEADER_X, HEADER_Y, 0, 0, true);
+        // Draw a box around the header
+        fill_rect(bx-2, by-2, BOX_W+4, BOX_H+4, 146);
+        fill_rect(bx-1, by-1, BOX_W+2, BOX_H+2, 255);
+        fill_rect(bx, by, BOX_W, BOX_H, 0);
 
-    // Draw stage buttons
-    for(i = 0; i < STAGE_COUNT+1; ++ i) {
+        // Draw header
+        draw_text_fast(bmpFont, "CHOOSE A STAGE", 
+            HEADER_X, HEADER_Y, 0, 0, true);
 
-        snprintf(buf, 10, "STAGE %d", i);
-        draw_text_fast(bmpFont, i == 0 ? "BACK" : buf, 
-            BUTTON_X + (i/m)*BUTTON_OFF_X, 
-            HEADER_Y + BUTTON_Y  + BUTTON_OFF_Y*(i%m), 
-            0, 0, false);
+        // Draw stage buttons
+        for(i = 0; i < STAGE_COUNT+1; ++ i) {
+
+            snprintf(buf, 10, "STAGE %d", i);
+            draw_text_fast(bmpFont, i == 0 ? "BACK" : buf, 
+                BUTTON_X + (i/m)*BUTTON_OFF_X, 
+                HEADER_Y + BUTTON_Y  + BUTTON_OFF_Y*(i%m), 
+                0, 0, false);
+        }
+
+        redrawMenu = false;
     }
+
+    // Draw menu cursor
+    smenu_draw_cursor(BUTTON_X, HEADER_Y + BUTTON_Y, 
+        BUTTON_OFF_X, BUTTON_OFF_Y);
 }
 
 
@@ -127,6 +170,8 @@ static int16 smenu_init() {
     redrawBG = true;
     redrawMenu = true;
     pcpos = vec2(320-96+16,100-32+24);
+    cpos = vec2(0, 0);
+    animTimer = 0;
 
     return 0;
 }
@@ -134,6 +179,8 @@ static int16 smenu_init() {
 
 // Update
 static void smenu_update(int16 steps) {
+
+    const int16 ANIM_SPEED = 1;
 
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
@@ -143,6 +190,33 @@ static void smenu_update(int16 steps) {
     }
 
     if(tr_is_active()) return;
+
+    // Animate cursor
+    animTimer += ANIM_SPEED * steps;
+    animTimer %= ANIM_TIME;
+
+    //
+    // Update cursor position
+    //
+    opos = cpos;
+    // Vertical
+    if(input_get_arrow_key(ArrowDown) == StatePressed)
+        ++ cpos.y;
+    else if(input_get_arrow_key(ArrowUp) == StatePressed)
+        -- cpos.y;
+    cpos.y = neg_mod(cpos.y, (STAGE_COUNT+1)/2);
+
+    // Horizontal
+    if(input_get_arrow_key(ArrowRight) == StatePressed)
+        ++ cpos.x;
+    else if(input_get_arrow_key(ArrowLeft) == StatePressed)
+        -- cpos.x;
+    cpos.x = neg_mod(cpos.x, 2);
+
+    if(cpos.x != opos.x || cpos.y != opos.y) {
+
+        fillOldCursorPos = true;
+    }
 }
 
 
@@ -157,11 +231,7 @@ static void smenu_draw() {
     }
 
     // Menu
-    if(redrawMenu) {
-
-        smenu_draw_menu();
-        redrawMenu = false;
-    }
+    smenu_draw_menu();
 }
 
 
