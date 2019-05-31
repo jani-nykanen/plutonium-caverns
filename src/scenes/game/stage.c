@@ -425,7 +425,7 @@ int stage_init(Stage* s, const char* mapPath) {
         THROW_MALLOC_ERR;
         return 1;
     }
-    s->bcount = 0;
+    s->bcount = 1;
     for(i = 0; i < size; ++ i) {
 
         tileid =  (uint8)max_int16(t->layers[0] [i+t->width], 16) -16;
