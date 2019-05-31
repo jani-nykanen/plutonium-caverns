@@ -25,6 +25,9 @@ typedef struct {
     Bitmap* bmpAnim;
     Bitmap* bmpExp;
 
+    // Flags
+    boolean initialized;
+
     // Map
     Tilemap* tmap;
     // Active map data
@@ -55,6 +58,11 @@ typedef struct {
 
 // Create a stage object
 Stage* create_stage();
+// Destroy
+void destroy_stage(Stage* s);
+
+// "Refactor" a stage object
+void stage_refactor(Stage* s);
 
 // Initialize a stage
 int stage_init(Stage* s, const char* mapPath);

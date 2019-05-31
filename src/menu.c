@@ -13,7 +13,7 @@
 
 
 // Create a menu
-Menu create_menu() {
+Menu create_menu(uint8 escAction) {
 
     Menu m;
     m.buttonCount = 0;
@@ -22,6 +22,7 @@ Menu create_menu() {
     m.bmpFont = (Bitmap*)get_asset("font");
     m.width = 0;
     m.redraw = true;
+    m.escAction = escAction;
 
     return m;
 }
@@ -45,6 +46,13 @@ void menu_update(Menu* m, int16 steps) {
     int8 opos = m->cpos;
 
     if(!m->active) return;
+
+    // Check escape
+    if(input_get_button(3) == StatePressed) {
+
+        m->cbs[m->escAction] ();
+        return;
+    }
 
     // Check if enter pressed
     if(input_get_button(2) == StatePressed) {

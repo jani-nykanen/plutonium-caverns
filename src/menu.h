@@ -16,6 +16,7 @@
 typedef struct {
 
     int8 cpos;
+    uint8 escAction;
     uint8 buttonCount;
     // Button info (no need to add an own
     // struct for these, really)
@@ -33,7 +34,7 @@ typedef struct {
 } Menu;
 
 // Create a menu
-Menu create_menu();
+Menu create_menu(uint8 escAction);
 
 // Add a button
 void menu_add_button(Menu* m, const char* text, void (*cb) (void));

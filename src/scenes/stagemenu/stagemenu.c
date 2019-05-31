@@ -21,6 +21,8 @@ static const char* SMENU_SCENE_NAME = "smenu";
 // Constants
 static const uint16 STAGE_COUNT = 15;
 static const int16 ANIM_TIME = 120;
+static const int16 PLANET_X = 320-64;
+static const int16 PLANET_Y = 100;
 
 // (Re)draw flags
 static boolean redrawBG;
@@ -54,10 +56,6 @@ static void smenu_draw_bg() {
 
     clear_screen(0);
 
-    // Draw planet
-    draw_bitmap_region_fast(bmpSMenu,0,0,64,64,
-        320-96,100-32);
-
     // Draw stars to random positions
     draw_stars(0, 12,4);
     draw_stars(1, 14,2);
@@ -72,6 +70,30 @@ static void smenu_draw_bg() {
     // Draw planet cursor
     draw_bitmap_region(bmpSMenu, 64, 0, 16, 16,
         pcpos.x-8, pcpos.y-8, false);
+}
+
+
+// Draw planet
+static void smenu_draw_planet() {
+
+    int16 animPos;
+
+     // Draw planet
+    draw_bitmap_region_fast(bmpSMenu,0,0,64,64,
+        PLANET_X-32,PLANET_Y-32);
+
+    // Draw marker
+    draw_bitmap_region(bmpSMenu, 64, 0, 16, 16,
+        pcpos.x-8, pcpos.y-8, false);
+
+    // Draw cursor
+    animPos = ANIM_TIME/2 - abs(animTimer-ANIM_TIME/2);
+    animPos /= (ANIM_TIME/8);
+
+    // Draw cursor
+    draw_bitmap_region(bmpSMenu, 80, 16, 16, 16,
+        pcpos.x-8, pcpos.y-20-animPos, false);
+
 }
 
 
@@ -151,6 +173,24 @@ static void smenu_draw_menu() {
 }
 
 
+// Compute planet cursor position
+static void smenu_compute_pcursor_pos() {
+
+    static const int16 RADIUS = 11;
+
+    int16 i;
+
+    if(cpos.x == 0 && cpos.y == 0) 
+        return;
+    
+    i = cpos.x * (STAGE_COUNT+1)/2 + cpos.y;
+
+    srand(i);
+    pcpos.x = PLANET_X + rand() % (RADIUS*2) - RADIUS;
+    pcpos.y = PLANET_Y + rand() % (RADIUS*2) - RADIUS;
+}
+
+
 // Initialize
 static int16 smenu_init() {
 
@@ -169,13 +209,29 @@ static int16 smenu_init() {
     // Set defaults
     redrawBG = true;
     redrawMenu = true;
-    pcpos = vec2(320-96+16,100-32+24);
-    cpos = vec2(0, 0);
     animTimer = 0;
+    // Set cursor positions
+    pcpos = vec2(320-96+16,100-32+24);
+    cpos = vec2(0, 1);
+    smenu_compute_pcursor_pos();
 
     return 0;
 }
 
+
+// Go to stage callback
+static void cb_goto_stage() {
+    
+    int16 i = cpos.x * (STAGE_COUNT+1)/2 + cpos.y;
+    if(i != 0) {
+
+        app_change_scene("game", (void*)i);
+    }
+    else {
+
+        app_terminate();
+    }
+}
 
 // Update
 static void smenu_update(int16 steps) {
@@ -185,11 +241,18 @@ static void smenu_update(int16 steps) {
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
 
-        app_terminate();
+        tr_activate(FadeIn, 2, app_terminate);
         return;
     }
 
     if(tr_is_active()) return;
+
+    // Enter pressed
+    if(input_get_button(2) == StatePressed) {
+
+        tr_activate(FadeIn, 2, cb_goto_stage);
+        return;
+    }
 
     // Animate cursor
     animTimer += ANIM_SPEED * steps;
@@ -215,6 +278,7 @@ static void smenu_update(int16 steps) {
 
     if(cpos.x != opos.x || cpos.y != opos.y) {
 
+        smenu_compute_pcursor_pos();
         fillOldCursorPos = true;
     }
 }
@@ -226,9 +290,12 @@ static void smenu_draw() {
     // Background
     if(redrawBG) {
 
-        smenu_draw_bg();
+        smenu_draw_bg(); 
         redrawBG = false;
     }
+
+    // Planet
+    smenu_draw_planet();
 
     // Menu
     smenu_draw_menu();
@@ -246,6 +313,7 @@ static void smenu_dispose() {
 static void smenu_on_change(void* param) {
 
     redrawBG = true;
+    redrawMenu = true;
 }
 
 

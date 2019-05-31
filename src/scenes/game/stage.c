@@ -377,7 +377,27 @@ Stage* create_stage() {
     s->bmpAnim = (Bitmap*)get_asset("anim");
     s->bmpExp = (Bitmap*)get_asset("exp");
 
+    s->initialized = false;
+
     return s;
+}
+// Destroy
+void destroy_stage(Stage* s) {
+
+    if(s == NULL) return;
+    stage_refactor(s);
+    free(s);
+}
+
+
+// Destroy a stage object
+void stage_refactor(Stage* s) {
+
+    if(s == NULL || !s->initialized) return;
+
+    if(s->data != NULL) free(s->data);
+    if(s->solid != NULL) free(s->solid);
+    if(s->boulders != NULL) free(s->boulders);
 }
 
 
@@ -449,6 +469,8 @@ int stage_init(Stage* s, const char* mapPath) {
 
     // Parse objects
     stage_parse_objects(s);
+
+    s->initialized = true;
 
     return 0;
 }

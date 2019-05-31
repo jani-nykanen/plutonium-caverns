@@ -12,6 +12,7 @@
 #include "../../core/application.h"
 #include "../../core/assets.h"
 #include "../../core/transition.h"
+#include "../../core/err.h"
 
 #include "../../menu.h"
 
@@ -82,7 +83,7 @@ static void cb_quit() {
 static void game_create_pause_menu() {
 
     // Create menu
-    pauseMenu = create_menu();
+    pauseMenu = create_menu(0);
     
     // Add buttons
     menu_add_button(&pauseMenu, "RESUME", cb_resume);
@@ -123,10 +124,6 @@ static int16 game_init() {
     // Initialize components
     init_boulders();
     init_players();
-    if(stage_init(stage, "ASSETS/MAPS/0.BIN") == 1) {
-
-        return 1;
-    }
 
     // Set defaults
     redrawHUD = true;
@@ -144,13 +141,6 @@ static int16 game_init() {
 // Update
 static void game_update(int16 steps) {
 
-    // Quit (TEMPORARY!)
-    if(input_get_button(3) == StatePressed) {
-
-        cb_quit();
-        return;
-    }
-
     if(tr_is_active()) return;
 
     // Check pause
@@ -160,7 +150,8 @@ static void game_update(int16 steps) {
         return;
     }
     // Pause game
-    else if(input_get_button(2) == StatePressed) {
+    else if(input_get_button(2) == StatePressed ||
+            input_get_button(3) == StatePressed) {
 
         menu_activate(&pauseMenu, 0);
         return;
@@ -206,14 +197,26 @@ static void game_draw() {
 // Dispose
 static void game_dispose() {
 
-    // ...
+    // Destroy allocated data
+    destroy_stage(stage);
 }
 
 
 // Change
 static void game_on_change(void* param) {
 
-    // ...
+    char path[32];
+    snprintf(path, 32, "ASSETS/MAPS/%d.BIN", (int16)param);
+
+    stage_refactor(stage);
+    if(stage_init(stage, path) == 1) {
+
+        // TODO: Error handling...
+        app_terminate();
+    }
+
+    // Set re-render flags
+    redrawHUD = true;
 }
 
 
