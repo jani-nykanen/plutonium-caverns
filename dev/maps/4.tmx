@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="10" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="../editor_tiles.tsx"/>
+ <layer id="1" name="Tile layer 1" width="10" height="11">
+  <data encoding="csv">
+3,2,1,0,0,0,0,0,0,0,
+17,17,17,17,17,17,17,17,17,17,
+17,0,0,20,0,0,18,0,38,17,
+17,0,21,20,20,0,17,17,20,17,
+17,0,0,18,0,0,20,0,0,17,
+17,17,17,17,17,23,17,0,38,17,
+17,20,20,0,0,0,17,17,17,17,
+17,20,20,0,0,21,18,0,0,17,
+17,0,20,20,0,0,20,21,0,17,
+17,34,20,20,33,0,20,21,0,17,
+17,17,17,17,17,17,17,17,17,17
+</data>
+ </layer>
+</map>
