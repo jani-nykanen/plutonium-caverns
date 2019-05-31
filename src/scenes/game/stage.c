@@ -934,6 +934,8 @@ void stage_detonate(Stage* s, uint8 dx, uint8 dy) {
     int16 p;
     int16 i;
 
+    stage_update_solid(s, dx, dy, 0);
+
     for(y = dy-1; y <= dy+1; ++ y) {
 
         for(x = dx-1; x <= dx+1; ++ x) {
