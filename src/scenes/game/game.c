@@ -21,6 +21,9 @@
 // Game scene name
 static const char* GAME_SCENE_NAME = "game";
 
+// Constants
+static const int16 CLEAR_TIME = 120;
+
 // Bitmaps
 static Bitmap* bmpFont;
 static Bitmap* bmpItems;
@@ -31,6 +34,13 @@ static Menu pauseMenu;
 
 // Render flags
 static boolean redrawHUD;
+static boolean redrawClear;
+// Other flags
+static boolean stageClear;
+
+// Stage clear timer
+static int16 clearTimer;
+
 
 // Draw an energy bar
 static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
@@ -46,6 +56,25 @@ static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
             x+i*9, 
             y+1);
     }
+}
+
+
+// Draw stage clear
+static void game_draw_stage_clear() {
+
+    const int16 WIDTH = 8*14;
+    const int16 HEIGHT = 3*8;
+
+    int16 dx = stage->topLeft.x + stage->width*8;
+    int16 dy = stage->topLeft.y + stage->height*8;
+
+    // Draw box
+    fill_rect(dx-WIDTH/2-2, dy-HEIGHT/2-2, WIDTH+4, HEIGHT+4, 146);
+    fill_rect(dx-WIDTH/2-1, dy-HEIGHT/2-1, WIDTH+2, HEIGHT+2, 255);
+    fill_rect(dx-WIDTH/2, dy-HEIGHT/2, WIDTH, HEIGHT, 0);
+
+    // Draw text
+    draw_text_fast(bmpFont, "STAGE CLEAR", dx, dy-4, 0, 0, true);
 }
 
 
@@ -127,6 +156,9 @@ static int16 game_init() {
 
     // Set defaults
     redrawHUD = true;
+    clearTimer = 0;
+    stageClear = false;
+    redrawClear = false;
 
     // Create pause menu
     game_create_pause_menu();
@@ -142,6 +174,18 @@ static int16 game_init() {
 static void game_update(int16 steps) {
 
     if(tr_is_active()) return;
+
+    // Stage clear
+    if(stageClear) {
+
+        clearTimer -= 1 * steps;
+        if(clearTimer <= 0) {
+
+            tr_activate(FadeIn, 2, cb_change);
+        }
+
+        return;
+    }
 
     // Check pause
     if(pauseMenu.active) {
@@ -166,6 +210,14 @@ static void game_update(int16 steps) {
 
     // Update stage
     stage_update(stage, steps);
+
+    // Check if the stage is clear
+    if(stage->pl.gems == stage->pl.maxGems) {
+
+        stageClear = true;
+        redrawClear = true;
+        clearTimer = CLEAR_TIME;
+    }
 }
 
 
@@ -189,6 +241,13 @@ static void game_draw() {
 
         game_redraw_info(&stage->pl);
         redrawHUD = false;
+    }
+
+    // Draw stage clear
+    if(redrawClear) {
+
+        game_draw_stage_clear();
+        redrawClear = false;
     }
 
 }
@@ -217,6 +276,8 @@ static void game_on_change(void* param) {
 
     // Set re-render flags
     redrawHUD = true;
+    redrawClear = false;
+    stageClear = false;
 }
 
 

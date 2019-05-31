@@ -37,4 +37,4 @@ fi
 ../tools/tmx2bin maps/10.tmx ../ASSETS/MAPS/10.BIN
 ../tools/tmx2bin maps/11.tmx ../ASSETS/MAPS/11.BIN
 ../tools/tmx2bin maps/12.tmx ../ASSETS/MAPS/12.BIN
-
+../tools/tmx2bin maps/13.tmx ../ASSETS/MAPS/13.BIN
