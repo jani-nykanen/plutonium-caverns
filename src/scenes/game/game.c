@@ -224,6 +224,17 @@ static void game_update(int16 steps) {
 // Draw 
 static void game_draw() {
 
+    // Draw stage clear
+    if(stageClear) {
+
+        if(redrawClear) {
+            
+            game_draw_stage_clear();
+            redrawClear = false;
+        }
+        return;
+    }
+
     if(pauseMenu.active) {
 
         // Draw pause
@@ -241,13 +252,6 @@ static void game_draw() {
 
         game_redraw_info(&stage->pl);
         redrawHUD = false;
-    }
-
-    // Draw stage clear
-    if(redrawClear) {
-
-        game_draw_stage_clear();
-        redrawClear = false;
     }
 
 }

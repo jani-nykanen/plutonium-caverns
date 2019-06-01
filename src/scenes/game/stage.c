@@ -95,7 +95,6 @@ static void stage_draw_animation(Stage* s, int16 topx, int16 topy) {
 
     int16 sx, sy, sw, sh, dx, dy;
     int16 skip;
-
     
     // Draw disappearing tile
     if(s->animMode == 1 || s->animMode == 2) {
@@ -501,6 +500,15 @@ void stage_update(Stage* s, int steps) {
 
             if(s->animMode != 5)
                 s->data[s->animPos.y*s->width+s->animPos.x] = 0;
+            else {
+
+                // Needed to get rid of certain
+                // "artefacts"
+                stage_draw_static(s, 
+                    s->animPos.x-1, s->animPos.y-1,
+                    s->animPos.x+1, s->animPos.y+1,
+                    s->topLeft.x, s->topLeft.y, 0);
+            }
 
             // Make sure the player is not moving
             s->pl.moving = false;
