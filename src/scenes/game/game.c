@@ -41,6 +41,9 @@ static boolean stageClear;
 // Stage clear timer
 static int16 clearTimer;
 
+// Stage index
+static uint8 stageIndex;
+
 
 // Draw an energy bar
 static void draw_energy_bar(int x, int y, uint8 max, uint8 val) {
@@ -228,7 +231,7 @@ static void game_draw() {
     if(stageClear) {
 
         if(redrawClear) {
-            
+
             game_draw_stage_clear();
             redrawClear = false;
         }
@@ -282,6 +285,8 @@ static void game_on_change(void* param) {
     redrawHUD = true;
     redrawClear = false;
     stageClear = false;
+
+    stageIndex = (uint8)param;
 }
 
 
@@ -315,10 +320,11 @@ void game_redraw_info(Player* pl) {
     const int BAR_MAX = 5;
 
     uint8 i = 0;
-    char buf[8];
+    char buf[10];
 
     // Draw stage name
-    draw_text_fast(bmpFont, "STAGE 1", 
+    snprintf(buf, 10, "STAGE %d", (int16)stageIndex);
+    draw_text_fast(bmpFont, buf, 
         TOP_X + FRAME_WIDTH/2, TOP_Y+8,0,0, true);
 
     // Draw consumable item icons
@@ -342,12 +348,12 @@ void game_redraw_info(Player* pl) {
         TOP_X+ITEM_X, TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3);
 
     // Draw collectable item counts
-    snprintf(buf, 8, "\2%d", (int16)pl->keys);
+    snprintf(buf, 10, "\2%d", (int16)pl->keys);
     draw_text_fast(bmpFont, buf, 
         TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+ITEM_OFF_Y*2 +4, 
         0, 0, false);
-    snprintf(buf, 8, "\2%d", (int16)pl->bombs);
+    snprintf(buf, 10, "\2%d", (int16)pl->bombs);
     draw_text_fast(bmpFont, buf, 
         TOP_X+ITEM_X+ITEM_OFF_X, 
         TOP_Y+ITEM_START_Y+ITEM_OFF_Y*3 +4, 
