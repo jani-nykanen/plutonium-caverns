@@ -313,7 +313,7 @@ void game_redraw_info(Player* pl) {
     const int FRAME_WIDTH = 80;
 
     const int ITEM_START_Y = 28;
-    const int ITEM_X = 4;
+    const int ITEM_X = 2;
     const int ITEM_OFF_X = 20;
     const int ITEM_OFF_Y = 22;
 
