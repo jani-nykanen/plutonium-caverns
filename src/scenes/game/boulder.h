@@ -16,7 +16,6 @@ typedef struct
     Byte2 target;
 
     // Flags
-    boolean isBomb;
     boolean exist;
     boolean redraw;
     boolean oldPlayerMoveState;
@@ -25,6 +24,10 @@ typedef struct
     uint8 moveTimer;
     boolean moving;
     int8 bombTimer;
+    uint8 animTimer;
+
+    // Type
+    uint8 type;
 
 } Boulder;
 
@@ -32,7 +35,7 @@ typedef struct
 void init_boulders();
 
 // Create a boulder
-Boulder create_boulder(uint8 x, uint8 y, bool makeBomb);
+Boulder create_boulder(uint8 x, uint8 y, uint8 type);
 
 // Update boulder
 void boulder_update(Boulder* b, void* pl, void* s, int steps);

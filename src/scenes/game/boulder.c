@@ -13,73 +13,19 @@
 #include "player.h"
 #include "stage.h"
 
+// Contants
+static const uint8 BHOLE_ANIM_MAX = 30;
+
 // Bitmaps
 static Bitmap* bmpTileset;
 static Bitmap* bmpItems;
 
 
-// Initialize boulders
-void init_boulders() {
+// Move
+static void boulder_move(Boulder* b, Player* pl, Stage* s, int16 steps) {
 
-    // Get bitmaps
-    bmpTileset = (Bitmap*)get_asset("tileset");
-    bmpItems = (Bitmap*)get_asset("items");
-}
-
-
-// Create a boulder
-Boulder create_boulder(uint8 x, uint8 y, bool makeBomb) {
-
-    Boulder b;
-    b.pos.x = x;
-    b.pos.y = y;
-    b.target = b.pos;
-    b.isBomb = makeBomb;
-    b.bombTimer = 5;
-
-    // Set defaults
-    b.moving = false;
-    b.moveTimer = 0;
-    b.redraw = true;    
-    b.exist = true;
-    b.oldPlayerMoveState = false;
-
-    return b;
-}
-
-
-// Update boulder
-void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
-
-    Player* pl = (Player*)_pl;
-    Stage* s = (Stage*)_s;
     int16 dist;
     Byte2 dir;
-
-    if(!b->exist) return;
-
-    // Only move if the player is moving
-    if(!pl->moving && b->moving) {
-
-        b->moving = false;
-        b->pos = b->target;
-        b->moveTimer = 0;
-
-        // Check if in lava
-        if(stage_get_solid_data(s, b->pos.x, b->pos.y) == 3) {
-
-            // Remove lava
-            stage_update_tile(s, b->pos.x, b->pos.y, 0);
-            stage_update_solid(s, b->pos.x, b->pos.y, 0);
-
-            // Stop existing
-            b->exist = false;
-            return;
-        }
-
-        // Update solid data
-        stage_update_solid(s, b->pos.x, b->pos.y, 2);
-    }
 
     // Move
     if(b->moving) {
@@ -104,7 +50,8 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
                 // Check if not a free tile
                 if(b->target.x < 1 || b->target.x >= s->width-1 ||
                     b->target.y < 1 || b->target.y >= s->height-1 ||
-                    (stage_get_solid_data(s, b->target.x, b->target.y) > 0 &&
+                    (b->type != 2 &&
+                     stage_get_solid_data(s, b->target.x, b->target.y) > 0 &&
                      stage_get_solid_data(s, b->target.x, b->target.y) != 3) ) {
                     
                     pl->target = pl->pos;
@@ -135,9 +82,15 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
         } 
 
     }
+}
+
+
+// Update bomb
+static void boulder_update_bomb(Boulder* b, Player* pl, 
+    Stage* s, int16 steps) {
 
     // Check if a turn has passed
-    if(b->isBomb && pl->moving && !b->oldPlayerMoveState) {
+    if(b->type == 1 && pl->moving && !b->oldPlayerMoveState) {
 
         b->redraw = true;
         -- b->bombTimer;
@@ -155,10 +108,107 @@ void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
 }
 
 
+// Check collisions
+static void boulder_check_collision(Boulder* b, Player* pl, 
+    Stage* s, int16 steps) {
+    
+    // Only move if the player is moving
+    if(!pl->moving && b->moving) {
+
+        b->moving = false;
+        b->pos = b->target;
+        b->moveTimer = 0;
+
+        // Check if in lava
+        if(b->type != 2 && 
+           stage_get_solid_data(s, b->pos.x, b->pos.y) == 3) {
+
+            // Remove lava
+            stage_update_tile(s, b->pos.x, b->pos.y, 0);
+            stage_update_solid(s, b->pos.x, b->pos.y, 0);
+
+            // Stop existing
+            b->exist = false;
+            return;
+        }
+        else if(b->type == 2) {
+
+            // Destroy everything (we do it directly
+            // to prevent animation. Too lazy to add
+            // a different function for this...)
+            s->animTimer = 0;
+            s->data[b->pos.y * s->width + b->pos.x] = 0;
+            s->solid[b->pos.y * s->width + b->pos.x] = 0;
+        }
+
+        // Update solid data
+        stage_update_solid(s, b->pos.x, b->pos.y, 2);
+    }
+}
+
+
+// Initialize boulders
+void init_boulders() {
+
+    // Get bitmaps
+    bmpTileset = (Bitmap*)get_asset("tileset");
+    bmpItems = (Bitmap*)get_asset("items");
+}
+
+
+// Create a boulder
+Boulder create_boulder(uint8 x, uint8 y, uint8 type) {
+
+    Boulder b;
+    b.pos.x = x;
+    b.pos.y = y;
+    b.target = b.pos;
+    b.type = type;
+    b.bombTimer = 5;
+
+    // Set defaults
+    b.moving = false;
+    b.moveTimer = 0;
+    b.redraw = true;    
+    b.exist = true;
+    b.oldPlayerMoveState = false;
+
+    return b;
+}
+
+
+// Update boulder
+void boulder_update(Boulder* b, void* _pl, void* _s, int steps) {
+
+    Player* pl = (Player*)_pl;
+    Stage* s = (Stage*)_s;
+
+    if(!b->exist) return;
+
+    // Animate black hole
+    if(b->type == 2) {
+
+        b->animTimer += steps;
+        if(b->animTimer >= BHOLE_ANIM_MAX)
+            b->animTimer -= BHOLE_ANIM_MAX;
+
+        b->redraw = true;
+    }
+
+    // Check collision
+    boulder_check_collision(b, pl, s, steps);
+    // Move
+    boulder_move(b, pl, s, steps);
+    // Update bomb
+    boulder_update_bomb(b, pl, s, steps);
+}
+
+
 // Draw
 void boulder_draw(Boulder* b, int16 dx, int16 dy) {
 
     int16 x, y;
+    int16 frame;
 
     if(!b->exist || !b->redraw) return;
 
@@ -172,16 +222,25 @@ void boulder_draw(Boulder* b, int16 dx, int16 dy) {
 
     }
 
-    if(!b->isBomb) {
+    if(b->type == 0) {
 
         draw_bitmap_region(bmpTileset, 112, 0, 16, 16,
             dx + x, dy + y, false);
     }
-    else {
+    else if(b->type == 1) {
 
         draw_bitmap_region(bmpItems, 
             (5-b->bombTimer)*16, 16, 16, 16,
             dx + x, dy + y, false);
+    }
+    else if(b->type == 2) {
+
+        frame = b->animTimer / (BHOLE_ANIM_MAX/4);
+        if(frame > 3) frame = 3;
+        fill_rect(dx + x, dy + y, 16, 16, 0);
+        draw_bitmap_region_fast(bmpItems, 
+            frame*16, 48, 16, 16,
+            dx + x, dy + y);
     }
 
     b->redraw = false;

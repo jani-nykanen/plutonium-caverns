@@ -231,7 +231,7 @@ static void stage_draw_lava(Stage* s, int dx, int dy) {
 
 
 // Add a boulder
-static void stage_add_boulder(Stage* s, uint8 x, uint8 y, boolean makeBomb) {
+static void stage_add_boulder(Stage* s, uint8 x, uint8 y, uint8 type) {
 
     uint8 i = 0;
     // Find the first boulder that does
@@ -240,7 +240,7 @@ static void stage_add_boulder(Stage* s, uint8 x, uint8 y, boolean makeBomb) {
 
         if(!s->boulders[i].exist) {
 
-            s->boulders[i] = create_boulder(x, y, makeBomb);
+            s->boulders[i] = create_boulder(x, y, type);
             s->solid[y*s->width+x] = 2;
             break;
         }
@@ -264,7 +264,7 @@ static void stage_parse_objects(Stage* s) {
             // Boulder
             if(t == 5) {
 
-                stage_add_boulder(s, x, y, false);
+                stage_add_boulder(s, x, y, 0);
                 s->data[y*s->width+x] = 0;
             }
             // Player
@@ -277,6 +277,12 @@ static void stage_parse_objects(Stage* s) {
             else if(t == 22) {
 
                 ++ maxGems;
+            }
+            // Black hole
+            else if(t == 23) {
+
+                stage_add_boulder(s, x, y, 2);
+                s->data[y*s->width+x] = 0;
             }
         }
     }
@@ -508,6 +514,7 @@ void stage_update(Stage* s, int steps) {
                     s->animPos.x-1, s->animPos.y-1,
                     s->animPos.x+1, s->animPos.y+1,
                     s->topLeft.x, s->topLeft.y, 0);
+                s->pl.redraw = true;
             }
 
             // Make sure the player is not moving
@@ -519,7 +526,7 @@ void stage_update(Stage* s, int steps) {
             // boulder
             if(s->animMode == 2) {
 
-                stage_add_boulder(s, s->animPos.x, s->animPos.y, false);
+                stage_add_boulder(s, s->animPos.x, s->animPos.y, 0);
             }
         }
 
@@ -903,7 +910,7 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
         if(pl->bombs > 0) {
             // Add a bomb
-            stage_add_boulder(s, tx, ty, true);
+            stage_add_boulder(s, tx, ty, 1);
             stage_update_solid(s, tx, ty, 0);
             stage_update_tile(s, tx, ty, 0);
 
