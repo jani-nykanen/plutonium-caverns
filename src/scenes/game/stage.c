@@ -381,6 +381,7 @@ Stage* create_stage() {
     s->bmpItems = (Bitmap*)get_asset("items");
     s->bmpAnim = (Bitmap*)get_asset("anim");
     s->bmpExp = (Bitmap*)get_asset("exp");
+    s->bmpShip = (Bitmap*)get_asset("ship");
 
     s->initialized = false;
 
@@ -438,7 +439,7 @@ int stage_init(Stage* s, const char* mapPath) {
         s->solid[i] = 0;
 
         // If boulder
-        if(tileid == 5 || tileid == 3 || tileid == 6) {
+        if(tileid == 5 || tileid == 3 || tileid == 6 || tileid == 23) {
 
             ++ s->bcount;
         }
@@ -612,8 +613,13 @@ void stage_draw_static(Stage* s,
     uint8 x = 0;
     uint8 y = 0;
 
-    int sx = 0;
-    int sy = 0;
+    int16 sx = 0;
+    int16 sy = 0;
+    int16 sw = 16;
+    int16 sh = 16;
+
+    int8 jx = 0;
+    int8 jy = 0;
 
     uint8 t;
     Bitmap* bmp;
@@ -621,6 +627,11 @@ void stage_draw_static(Stage* s,
     for(y = starty; y <= ey; ++ y) {
 
         for(x = startx; x <= ex; ++ x) {
+
+            sw = 16;
+            sh = 16;
+            jx = 0;
+            jy = 0;
 
             t = s->data[y*s->width+x] ;
             if(t == 0) {
@@ -690,6 +701,16 @@ void stage_draw_static(Stage* s,
                 bmp = s->bmpItems;
                 break;
 
+            // Ship
+            case 24:
+                sx = 0;
+                sy = 0;
+                sw = 32;
+                sh = 32;
+                jx = -1;
+                jy = -1;
+                bmp = s->bmpShip;
+                break;
             default:
                 continue;
             }
@@ -701,8 +722,9 @@ void stage_draw_static(Stage* s,
                     false);
             }
             else {
+                
                 draw_bitmap_region_fast(bmp,
-                    sx, sy, 16, 16, dx + x*16, dy + y*16);
+                    sx, sy, sw, sh, dx + (x+jx)*16, dy + (y+jy)*16);
             }
         }
     }
@@ -789,6 +811,10 @@ void stage_item_collision(Player* pl, Stage* s) {
     case 22:
         ++ pl->gems;
         remove = true;
+        break;
+
+    case 24:
+        pl->victory = true;
         break;
 
     default:

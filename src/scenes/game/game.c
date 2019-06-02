@@ -136,7 +136,8 @@ static int16 game_init() {
         BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||
         BITMAP("ASSETS/BITMAPS/ITEMS.BIN", "items") ||
         BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player") ||
-        BITMAP("ASSETS/BITMAPS/EXP.BIN", "exp")
+        BITMAP("ASSETS/BITMAPS/EXP.BIN", "exp") ||
+        BITMAP("ASSETS/BITMAPS/SHIP.BIN", "ship")
     ) {
 
         return 1;
@@ -215,11 +216,17 @@ static void game_update(int16 steps) {
     stage_update(stage, steps);
 
     // Check if the stage is clear
-    if(stage->pl.gems == stage->pl.maxGems) {
+    if(stage->pl.maxGems > 0 && stage->pl.gems == stage->pl.maxGems) {
 
         stageClear = true;
         redrawClear = true;
         clearTimer = CLEAR_TIME;
+    }
+
+    // Check if the game is beaten
+    if(stage->pl.victory) {
+
+        tr_activate(FadeIn, 1, app_terminate);
     }
 }
 

@@ -24,6 +24,7 @@ typedef struct {
     Bitmap* bmpItems;
     Bitmap* bmpAnim;
     Bitmap* bmpExp;
+    Bitmap* bmpShip;
 
     // Flags
     boolean initialized;

@@ -24,6 +24,7 @@ typedef struct
     boolean acting;
     // Other flags
     boolean forceRelease;
+    boolean victory;
 
     // Item info
     uint8 pickaxe;
