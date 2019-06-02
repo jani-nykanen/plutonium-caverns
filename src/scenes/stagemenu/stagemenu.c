@@ -19,7 +19,7 @@
 static const char* SMENU_SCENE_NAME = "smenu";
 
 // Constants
-static const uint16 STAGE_COUNT = 15;
+static const uint16 STAGE_COUNT = 17;
 static const int16 ANIM_TIME = 120;
 static const int16 PLANET_X = 320-64;
 static const int16 PLANET_Y = 100;
