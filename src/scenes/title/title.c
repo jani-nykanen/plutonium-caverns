@@ -135,14 +135,12 @@ static void title_draw_background() {
 // Initialize
 static int16 title_init() {
 
-    // Load logo, font & stage menu bg stuff
-    if(BITMAP("ASSETS/BITMAPS/LOGO.BIN", "logo") ||
-       BITMAP("ASSETS/BITMAPS/FONT.BIN", "font") ||
+    // Load global stuff (or "global enough")
+    if( BITMAP("ASSETS/BITMAPS/FONT.BIN", "font") ||
        BITMAP("ASSETS/BITMAPS/SMENU.BIN", "smenu")) {
 
         return 1;
     }
-    bmpLogo = (Bitmap*)get_asset("logo");
     bmpFont = (Bitmap*)get_asset("font");
     bmpSMenu = (Bitmap*)get_asset("smenu");
 
@@ -305,7 +303,6 @@ static void title_on_change(void* param) {
 
 // Get title menu scene
 Scene title_get_scene() {
-
 
     Scene s;
     s.init = title_init;

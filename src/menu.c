@@ -101,7 +101,7 @@ void menu_draw(Menu* m, int16 dx, int16 dy) {
     y = dy - h/2;
 
     // Draw box
-    fill_rect(x-2, y-2, w+4, h+4, 0);
+    fill_rect(x-2, y-2, w+4, h+4, 146);
     fill_rect(x-1, y-1, w+2, h+2, 255);
     fill_rect(x, y, w, h, 0);
 

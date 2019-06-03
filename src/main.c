@@ -8,6 +8,7 @@
 #include "scenes/game/game.h"
 #include "scenes/stagemenu/stagemenu.h"
 #include "scenes/title/title.h"
+#include "scenes/intro/intro.h"
 
 #include <stdio.h>
 
@@ -25,7 +26,8 @@ void main() {
     // Add scenes
     app_add_scene(game_get_scene(), false);
     app_add_scene(smenu_get_scene(), false);
-    app_add_scene(title_get_scene(), true);
+    app_add_scene(title_get_scene(), false);
+    app_add_scene(intro_get_scene(), true);
 
     // Add buttons
     input_add_button(0, 44);
