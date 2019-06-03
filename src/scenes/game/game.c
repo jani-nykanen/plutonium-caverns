@@ -146,9 +146,6 @@ static int16 game_init() {
     // Create pause menu
     game_create_pause_menu();
 
-    // Set transition
-    tr_activate(FadeOut, 2, NULL);
-
     return 0;
 }
 
@@ -360,7 +357,6 @@ void game_redraw_info(Player* pl) {
 void game_clear_assets() {
     
     // Not working, omitting
-    /*
     if(assetsLoaded) {
 
         ass_remove("frame");
@@ -372,7 +368,6 @@ void game_clear_assets() {
         ass_remove("ship");
     }
     assetsLoaded = false;
-    */
 }
 
 
@@ -387,7 +382,6 @@ int16 game_load_assets() {
 
         assetsLoaded = true;
         if(
-            BITMAP("ASSETS/BITMAPS/SMENU.BIN", "smenu") ||
             BITMAP("ASSETS/BITMAPS/FRAME.BIN", "frame") ||
             BITMAP("ASSETS/BITMAPS/TILESET.BIN", "tileset") ||
             BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||

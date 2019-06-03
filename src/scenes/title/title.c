@@ -23,10 +23,16 @@
 // Scene name
 static const char* TITLE_SCENE_NAME = "title";
 
+// Constants
+static int16 INITIAL_LOGO_TIME = 120;
+
 // Flags
 static boolean logoLoaded;
 static boolean logoDrawn;
+static boolean bgDrawn;
 
+// Logo timer
+static int16 logoTimer;
 // Press enter timer
 static int8 enterTimer;
 // Phase
@@ -35,6 +41,7 @@ static uint8 phase;
 // Bitmaps
 static Bitmap* bmpLogo;
 static Bitmap* bmpFont;
+static Bitmap* bmpSMenu;
 
 // Menu
 static Menu menu;
@@ -90,17 +97,54 @@ static void title_create_pause_menu() {
 }
 
 
+// Draw stars
+static void draw_stars(uint8 i, uint8 x, uint8 y) {
+
+    draw_bitmap_region_fast(bmpSMenu, 64,
+        16 + i*16, 16, 16, x*16, y*16);
+}
+
+
+// Draw background
+static void title_draw_background() {
+
+    const int16 PLANET_X = 320-80;
+    const int16 PLANET_Y = 96;
+
+    clear_screen(0);
+
+    // Draw planet
+    draw_bitmap_region_fast(bmpSMenu, 0, 0, 64, 64, 
+        PLANET_X, PLANET_Y);
+
+    // Draw stars
+    draw_stars(0, 2, 4);
+    draw_stars(1, 1, 2);
+    draw_stars(0, 1, 6);
+
+    draw_stars(2, 4, 7);
+    draw_stars(1, 1, 9);
+    draw_stars(0, 3, 10);
+
+    draw_stars(0, 16, 3);
+    draw_stars(1, 19, 1);
+    draw_stars(2, 18, 5);
+}
+
+
 // Initialize
 static int16 title_init() {
 
-    // Load logo & font
+    // Load logo, font & stage menu bg stuff
     if(BITMAP("ASSETS/BITMAPS/LOGO.BIN", "logo") ||
-       BITMAP("ASSETS/BITMAPS/FONT.BIN", "font")) {
+       BITMAP("ASSETS/BITMAPS/FONT.BIN", "font") ||
+       BITMAP("ASSETS/BITMAPS/SMENU.BIN", "smenu")) {
 
         return 1;
     }
     bmpLogo = (Bitmap*)get_asset("logo");
     bmpFont = (Bitmap*)get_asset("font");
+    bmpSMenu = (Bitmap*)get_asset("smenu");
 
     // Pass data to global components
     init_menus();
@@ -108,11 +152,16 @@ static int16 title_init() {
     // Set defaults
     logoLoaded = false;
     logoDrawn = false;
+    bgDrawn = false;
     enterTimer = 59;
     phase = 0;
+    logoTimer = INITIAL_LOGO_TIME;
 
     // Create menu
     title_create_pause_menu();
+
+    // Set transition
+    tr_activate(FadeOut, 1, NULL);
 
     return 0;
 }
@@ -121,6 +170,8 @@ static int16 title_init() {
 // Update
 static void title_update(int16 steps) {
 
+    const int16 LOGO_SPEED = 2;
+
     // Quit
     if(input_get_button(3) == StatePressed) {
 
@@ -128,7 +179,19 @@ static void title_update(int16 steps) {
         return;
     }
 
-    if(tr_is_active()) return;
+    if(tr_is_active())  {
+
+        // Update logo timer
+        logoTimer -= LOGO_SPEED * steps;
+        if(logoTimer < 0)
+            logoTimer = 0;
+
+        return;
+    }
+    else {
+
+        logoTimer = 0;
+    }
 
     if(phase == 0) {
 
@@ -160,13 +223,22 @@ static void title_draw() {
     const int16 LOGO_Y = 16;
     const int16 COPYRIGHT_Y = -10;
     const int16 ENTER_Y = 144;
+    const int16 MENU_Y = 136;
 
-    if(!logoDrawn) {
+    toggle_clipping(true);
 
-        clear_screen(0);
+    if(!bgDrawn) {
+
+        title_draw_background();
+        bgDrawn = true;
+    }
+
+    if(!logoDrawn || logoTimer > 0) {
 
         // Draw logo
-        draw_bitmap_fast(bmpLogo, 160-bmpLogo->width/2, LOGO_Y);
+        fill_rect(160-bmpLogo->width/2, LOGO_Y-logoTimer-16, 
+            bmpLogo->width, 16, 0);
+        draw_bitmap_fast(bmpLogo, 160-bmpLogo->width/2, LOGO_Y-logoTimer);
 
         // Draw copyright
         draw_text_fast(bmpFont, "\4 2019 JANI NYK\5NEN", 
@@ -192,7 +264,7 @@ static void title_draw() {
     else {
 
         // Draw menu
-        menu_draw(&menu, 160, ENTER_Y);
+        menu_draw(&menu, 160, MENU_Y);
     }
 }
 
@@ -224,6 +296,7 @@ static void title_on_change(void* param) {
     }
     logoLoaded = true;
     logoDrawn = false;
+    bgDrawn = false;
 
     menu.redraw = true;
 }
