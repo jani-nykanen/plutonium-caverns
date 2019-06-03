@@ -9,4 +9,7 @@
 // Get stage menu scene
 Scene smenu_get_scene();
 
+// Initialize assets
+void smenu_init_assets();
+
 #endif // __STAGE_MENU__

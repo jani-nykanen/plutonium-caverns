@@ -375,14 +375,6 @@ Stage* create_stage() {
         return NULL;
     }
 
-    // Get bitmaps
-    s->bmpFrame = (Bitmap*)get_asset("frame");
-    s->bmpTileset = (Bitmap*)get_asset("tileset");
-    s->bmpItems = (Bitmap*)get_asset("items");
-    s->bmpAnim = (Bitmap*)get_asset("anim");
-    s->bmpExp = (Bitmap*)get_asset("exp");
-    s->bmpShip = (Bitmap*)get_asset("ship");
-
     s->initialized = false;
 
     return s;
@@ -479,6 +471,19 @@ int stage_init(Stage* s, const char* mapPath) {
     s->initialized = true;
 
     return 0;
+}
+
+
+// Initialize assets
+void stage_init_assets(Stage* s) {
+
+    // Get bitmaps
+    s->bmpFrame = (Bitmap*)get_asset("frame");
+    s->bmpTileset = (Bitmap*)get_asset("tileset");
+    s->bmpItems = (Bitmap*)get_asset("items");
+    s->bmpAnim = (Bitmap*)get_asset("anim");
+    s->bmpExp = (Bitmap*)get_asset("exp");
+    s->bmpShip = (Bitmap*)get_asset("ship");
 }
 
 

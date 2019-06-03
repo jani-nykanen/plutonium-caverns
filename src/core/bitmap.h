@@ -10,8 +10,8 @@
 typedef struct {
 
     // Dimensions
-    uint8 width;
-    uint8 height;
+    uint16 width;
+    uint16 height;
 
     // Pixels
     uint8* data;
@@ -19,7 +19,7 @@ typedef struct {
 } Bitmap;
 
 // Create a bitmap
-Bitmap* create_bitmap(uint8 w, uint8 h, uint8* data);
+Bitmap* create_bitmap(uint16 w, uint16 h, uint8* data);
 
 // Load a bitmap
 Bitmap* load_bitmap(const char* path);

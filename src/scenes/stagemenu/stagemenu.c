@@ -15,6 +15,8 @@
 #include "../../core/transition.h"
 #include "../../core/mathext.h"
 
+#include "../game/game.h"
+
 // Scene name
 static const char* SMENU_SCENE_NAME = "smenu";
 
@@ -194,18 +196,6 @@ static void smenu_compute_pcursor_pos() {
 // Initialize
 static int16 smenu_init() {
 
-    // Load bitmaps
-    if(
-        BITMAP("ASSETS/BITMAPS/SMENU.BIN", "smenu")
-    ) {
-
-        return 1;
-    }
-
-    // Get bitmaps
-    bmpSMenu = (Bitmap*)get_asset("smenu");
-    bmpFont = (Bitmap*)get_asset("font");
-
     // Set defaults
     redrawBG = true;
     redrawMenu = true;
@@ -229,7 +219,7 @@ static void cb_goto_stage() {
     }
     else {
 
-        app_terminate();
+        app_change_scene("title", NULL);
     }
 }
 
@@ -329,4 +319,13 @@ Scene smenu_get_scene() {
     s.name = SMENU_SCENE_NAME;
 
     return s;
+}
+
+
+// Initialize assets
+void smenu_init_assets() {
+
+    // Get bitmaps
+    bmpSMenu = (Bitmap*)get_asset("smenu");
+    bmpFont = (Bitmap*)get_asset("font");
 }

@@ -8,7 +8,7 @@
 #include "core/bitmap.h"
 
 // Button name length
-#define BUTTON_NAME_LENGTH 12
+#define BUTTON_NAME_LENGTH 14
 #define MAX_BUTTON_COUNT 8
 
 
@@ -32,6 +32,9 @@ typedef struct {
     Bitmap* bmpFont;
 
 } Menu;
+
+// Initialize menus
+void init_menus();
 
 // Create a menu
 Menu create_menu(uint8 escAction);

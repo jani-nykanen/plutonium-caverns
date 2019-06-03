@@ -11,7 +11,7 @@
 
 
 // Create a bitmap
-Bitmap* create_bitmap(uint8 w, uint8 h, uint8* data) {
+Bitmap* create_bitmap(uint16 w, uint16 h, uint8* data) {
 
     uint16 i = 0;
 
@@ -89,8 +89,10 @@ void destroy_bitmap(Bitmap* bmp) {
         return ;
 
     // Free data
-    if(bmp->data != NULL)
+    if(bmp->data != NULL) {
+        
         free(bmp->data);
+    }
     // Free bitmap
     free(bmp);
 }

@@ -22,7 +22,7 @@ fi
 ../tools/png2bin bitmaps/explosion.png ../ASSETS/BITMAPS/EXP.BIN
 ../tools/png2bin bitmaps/smenu.png ../ASSETS/BITMAPS/SMENU.BIN
 ../tools/png2bin bitmaps/ship.png ../ASSETS/BITMAPS/SHIP.BIN
-
+../tools/png2bin bitmaps/logo.png ../ASSETS/BITMAPS/LOGO.BIN
 
 # Maps
 ../tools/tmx2bin maps/0.tmx ../ASSETS/MAPS/0.BIN

@@ -37,6 +37,7 @@ static boolean redrawHUD;
 static boolean redrawClear;
 // Other flags
 static boolean stageClear;
+static boolean assetsLoaded;
 
 // Stage clear timer
 static int16 clearTimer;
@@ -128,25 +129,6 @@ static void game_create_pause_menu() {
 // Initialize
 static int16 game_init() {
 
-    // Load bitmaps
-    if(
-        BITMAP("ASSETS/BITMAPS/FONT.BIN", "font") ||
-        BITMAP("ASSETS/BITMAPS/FRAME.BIN", "frame") ||
-        BITMAP("ASSETS/BITMAPS/TILESET.BIN", "tileset") ||
-        BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||
-        BITMAP("ASSETS/BITMAPS/ITEMS.BIN", "items") ||
-        BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player") ||
-        BITMAP("ASSETS/BITMAPS/EXP.BIN", "exp") ||
-        BITMAP("ASSETS/BITMAPS/SHIP.BIN", "ship")
-    ) {
-
-        return 1;
-    }
-
-    // Get bitmaps
-    bmpFont = (Bitmap*) get_asset("font");
-    bmpItems = (Bitmap*) get_asset("items");
-
     // Create main components
     stage = create_stage();
     if(stage == NULL) {
@@ -154,15 +136,12 @@ static int16 game_init() {
         return 1;
     }
 
-    // Initialize components
-    init_boulders();
-    init_players();
-
     // Set defaults
     redrawHUD = true;
     clearTimer = 0;
     stageClear = false;
     redrawClear = false;
+    assetsLoaded = false;
 
     // Create pause menu
     game_create_pause_menu();
@@ -374,4 +353,62 @@ void game_redraw_info(Player* pl) {
             TOP_X+ITEM_X+i*ITEM_OFF_X, 
             TOP_Y+ITEM_START_Y+ITEM_OFF_Y*4);
     }
+}
+
+
+// Clear game assets
+void game_clear_assets() {
+    
+    // Not working, omitting
+    /*
+    if(assetsLoaded) {
+
+        ass_remove("frame");
+        ass_remove("tileset");
+        ass_remove("anim");
+        ass_remove("items");
+        ass_remove("player");
+        ass_remove("exp");
+        ass_remove("ship");
+    }
+    assetsLoaded = false;
+    */
+}
+
+
+// Load assets
+int16 game_load_assets() {
+
+    if(assetsLoaded) {
+
+        return 0;
+    }
+    else {
+
+        assetsLoaded = true;
+        if(
+            BITMAP("ASSETS/BITMAPS/SMENU.BIN", "smenu") ||
+            BITMAP("ASSETS/BITMAPS/FRAME.BIN", "frame") ||
+            BITMAP("ASSETS/BITMAPS/TILESET.BIN", "tileset") ||
+            BITMAP("ASSETS/BITMAPS/ANIM.BIN", "anim") ||
+            BITMAP("ASSETS/BITMAPS/ITEMS.BIN", "items") ||
+            BITMAP("ASSETS/BITMAPS/PLAYER.BIN", "player") ||
+            BITMAP("ASSETS/BITMAPS/EXP.BIN", "exp") ||
+            BITMAP("ASSETS/BITMAPS/SHIP.BIN", "ship")) {
+
+            return 1;
+        }
+
+        // Get bitmaps
+        bmpFont = (Bitmap*) get_asset("font");
+        bmpItems = (Bitmap*) get_asset("items");
+
+        // Pass bitmaps to the game components
+        stage_init_assets(stage);
+        init_boulders();
+        init_players();
+
+        return 0;
+
+    }   
 }

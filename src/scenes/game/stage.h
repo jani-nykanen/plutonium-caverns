@@ -67,6 +67,8 @@ void stage_refactor(Stage* s);
 
 // Initialize a stage
 int stage_init(Stage* s, const char* mapPath);
+// Initialize assets
+void stage_init_assets(Stage* s);
 
 // Update stage
 void stage_update(Stage* s, int steps);

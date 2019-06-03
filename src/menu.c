@@ -11,6 +11,16 @@
 #include <stdio.h>
 #include <string.h>
 
+// Bitmaps
+static Bitmap* bmpFont;
+
+
+// Initialize menus
+void init_menus() {
+
+    bmpFont = (Bitmap*)get_asset("font");
+}
+
 
 // Create a menu
 Menu create_menu(uint8 escAction) {
@@ -19,7 +29,6 @@ Menu create_menu(uint8 escAction) {
     m.buttonCount = 0;
     m.cpos = 0;
     m.active = false;
-    m.bmpFont = (Bitmap*)get_asset("font");
     m.width = 0;
     m.redraw = true;
     m.escAction = escAction;
@@ -101,7 +110,7 @@ void menu_draw(Menu* m, int16 dx, int16 dy) {
 
         m->text[i][0] = m->cpos == i ? '\6' : ' ';
 
-        draw_text_fast(m->bmpFont, m->text[i],
+        draw_text_fast(bmpFont, m->text[i],
             x+XOFF, y+YOFF+i*12+3, 0, 0, false);
     }
 
