@@ -31,6 +31,8 @@ static Bitmap* bmpStory;
 // Is the background drawn
 static boolean bgDrawn;
 
+// Story pointer
+static uint8 storyPointer;
 // Character timer
 static int16 chrTimer;
 // Character pos
@@ -39,7 +41,7 @@ static int16 chrPos;
 static uint16 len;
 
 // Story textes
-static const char* STORY_1 = 
+static const char* STORY[] = { 
 "YOU ARE AN ALIEN SPACE TRAVELER, FAR\n"
 "AWAY FROM HOME. YOU WERE EXPLORING A\n"
 "MYSTERIOUS DWARF PLANET NAMED \"PLUTO\".\n"
@@ -49,7 +51,15 @@ static const char* STORY_1 =
 "AGAIN, YOU MUST EXPLORE THE DARK\n"
 "CAVERNS OF PLUTO AND TRY TO FIND\n"
 "ENOUGH PLUTONIUM GEMS TO FUEL YOUR\n"
-"SHIP AND RETURN TO YOUR HOME PLANET.";
+"SHIP AND RETURN TO YOUR HOME PLANET."
+,
+"WITH THE POWER OF PLUTONIUM\n"
+"YOU FUEL YOU SHIP AND ESCAPE THIS\n"
+"COLD, COLD PLANET. NOW YOU CAN\n"
+"FINALLY RETURN YOUR HOME, A PLANET\n"
+"CALLED... EARTH.\n"
+
+};
 
 
 // Go to the stage menu
@@ -62,7 +72,7 @@ static void cb_go_to_stage() {
     smenu_init_assets();
 
     // Change scene
-    app_change_scene("smenu", (void*)0);
+    app_change_scene(storyPointer == 0 ? "smenu" : "intro", (void*)0);
 }
 
 
@@ -77,7 +87,7 @@ static int16 story_init() {
     chrTimer = LETTER_TIME;
     chrPos = 0;
 
-    len = strlen(STORY_1);
+    len = strlen(STORY[storyPointer]);
     
     return 0;
 }
@@ -126,9 +136,12 @@ static void story_draw() {
         
     }
 
-    // Draw text (temp)
-    draw_substr_fast(bmpFont, STORY_1, STORY_X, STORY_Y, 0 , 1,
-        chrPos, chrPos+1, false);
+    if(!tr_is_active()) {
+        
+        // Draw text (temp)
+        draw_substr_fast(bmpFont, STORY[storyPointer], STORY_X, STORY_Y, 0 , 1,
+            chrPos, chrPos+1, false);
+    }
 }
 
 
@@ -143,7 +156,11 @@ static void story_dispose() {
 static void story_on_change(void* param) {
 
     // Load intro bitmap
-    bmpStory = load_bitmap("ASSETS/BITMAPS/STORY1.BIN");
+    bmpStory = load_bitmap(
+        (uint8)param == 0 ?
+        "ASSETS/BITMAPS/STORY1.BIN" :
+        "ASSETS/BITMAPS/STORY2.BIN"
+        );
     if(bmpStory == NULL) {
 
         app_terminate();
@@ -153,6 +170,8 @@ static void story_on_change(void* param) {
     bgDrawn = false;
     chrTimer = LETTER_TIME;
     chrPos = 0;
+
+    storyPointer = (uint8)param;
 }
 
 

@@ -25,6 +25,8 @@ fi
 ../tools/png2bin bitmaps/logo.png ../ASSETS/BITMAPS/LOGO.BIN
 ../tools/png2bin bitmaps/intro.png ../ASSETS/BITMAPS/INTRO.BIN -dither
 ../tools/png2bin bitmaps/story1.png ../ASSETS/BITMAPS/STORY1.BIN -dither
+../tools/png2bin bitmaps/story2.png ../ASSETS/BITMAPS/STORY2.BIN -dither
+../tools/png2bin bitmaps/end.png ../ASSETS/BITMAPS/END.BIN
 
 # Maps
 ../tools/tmx2bin maps/0.tmx ../ASSETS/MAPS/0.BIN

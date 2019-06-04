@@ -15,6 +15,9 @@
 #include "../../core/transition.h"
 #include "../../core/mathext.h"
 
+// Scene name
+static const char* INTRO_SCENE_NAME = "intro";
+
 // Constants
 static const int16 WAIT_TIME = 120;
 
@@ -95,7 +98,15 @@ static void intro_dispose() {
 // Change
 static void intro_on_change(void* param) {
 
-    // ...
+    const int16 WAIT_MUL = 2;
+
+    bmpIntro = load_bitmap("ASSETS/BITMAPS/END.BIN");
+    if(bmpIntro == NULL) {
+
+        app_terminate();
+    }
+    timer = WAIT_TIME *WAIT_MUL;
+    bitmapDrawn = false;
 }
 
 
@@ -109,7 +120,7 @@ Scene intro_get_scene() {
     s.draw = intro_draw;
     s.dispose = intro_dispose;
     s.change = intro_on_change;
-    s.name = NULL;
+    s.name = INTRO_SCENE_NAME;
 
     return s;
 }

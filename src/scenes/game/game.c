@@ -150,6 +150,17 @@ static int16 game_init() {
 }
 
 
+// Victory callback
+static void cb_win() {
+
+    // Clear assets
+    game_clear_assets();
+
+    // Go to the story screen
+    app_change_scene("story", (void*)1);
+}
+
+
 // Update
 static void game_update(int16 steps) {
 
@@ -202,7 +213,7 @@ static void game_update(int16 steps) {
     // Check if the game is beaten
     if(stage->pl.victory) {
 
-        tr_activate(FadeIn, 1, app_terminate);
+        tr_activate(FadeIn, 1, cb_win);
     }
 }
 

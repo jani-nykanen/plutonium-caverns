@@ -69,7 +69,7 @@ static void start_game() {
     }
 
     // Go to the story scene
-    app_change_scene(storyPlayed ? "smenu" : "story", (void*)1);
+    app_change_scene(storyPlayed ? "smenu" : "story", (void*)0);
     storyPlayed = true;
 }
 
