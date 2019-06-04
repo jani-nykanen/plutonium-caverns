@@ -162,6 +162,9 @@ static int16 title_init() {
     phase = 0;
     logoTimer = INITIAL_LOGO_TIME;
 
+    // Check if a save file exists
+    storyPlayed = smenu_load_file();
+
     // Create menu
     title_create_pause_menu();
 

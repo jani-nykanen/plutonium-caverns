@@ -21,6 +21,7 @@
 static const char* SMENU_SCENE_NAME = "smenu";
 
 // Constants
+static const char* FPATH = "SAVE.DAT";
 static const uint16 STAGE_COUNT = 17;
 static const int16 ANIM_TIME = 120;
 static const int16 PLANET_X = 320-64;
@@ -40,6 +41,11 @@ static Vector2 opos;
 // Cursor animation timer
 static int16 animTimer;
 
+// Stage index
+static uint8 stageIndex;
+// Stage target
+static uint8 stageTarget;
+
 // Bitmaps
 static Bitmap* bmpSMenu;
 static Bitmap* bmpFont;
@@ -51,6 +57,25 @@ static void draw_stars(uint8 i, uint8 x, uint8 y) {
     draw_bitmap_region_fast(bmpSMenu, 64,
         16 + i*16, 16, 16, x*16, y*16);
 }
+
+
+// Save data
+static void smenu_save_data() {
+
+    // Open the file & check if exists
+    FILE* f = fopen(FPATH, "wb");
+    if(f == NULL) {
+
+        return;
+    }
+
+    // Store the current stage index
+    fwrite(&stageIndex, sizeof(uint8), 1, f);
+
+    // Close
+    fclose(f);
+}   
+
 
 
 // Draw background
@@ -159,7 +184,11 @@ static void smenu_draw_menu() {
         // Draw stage buttons
         for(i = 0; i < STAGE_COUNT+1; ++ i) {
 
-            snprintf(buf, 10, "STAGE %d", i);
+            if(i > stageIndex)
+                snprintf(buf, 10, "LOCKED");
+            else
+                snprintf(buf, 10, "STAGE %d", i);
+
             draw_text_fast(bmpFont, i == 0 ? "BACK" : buf, 
                 BUTTON_X + (i/m)*BUTTON_OFF_X, 
                 HEADER_Y + BUTTON_Y  + BUTTON_OFF_Y*(i%m), 
@@ -200,6 +229,8 @@ static int16 smenu_init() {
     redrawBG = true;
     redrawMenu = true;
     animTimer = 0;
+    stageIndex = 1;
+
     // Set cursor positions
     pcpos = vec2(320-96+16,100-32+24);
     cpos = vec2(0, 1);
@@ -212,10 +243,9 @@ static int16 smenu_init() {
 // Go to stage callback
 static void cb_goto_stage() {
     
-    int16 i = cpos.x * (STAGE_COUNT+1)/2 + cpos.y;
-    if(i != 0) {
+    if(stageTarget != 0) {
 
-        app_change_scene("game", (void*)i);
+        app_change_scene("game", (void*)stageTarget);
     }
     else {
 
@@ -236,6 +266,8 @@ static void smenu_update(int16 steps) {
 
     const int16 ANIM_SPEED = 1;
 
+    stageTarget = cpos.x * (STAGE_COUNT+1)/2 + cpos.y;
+
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
 
@@ -246,7 +278,8 @@ static void smenu_update(int16 steps) {
     if(tr_is_active()) return;
 
     // Enter pressed
-    if(input_get_button(2) == StatePressed) {
+    if(input_get_button(2) == StatePressed &&
+       stageTarget <= stageIndex) {
 
         tr_activate(FadeIn, 2, cb_goto_stage);
         return;
@@ -310,6 +343,16 @@ static void smenu_dispose() {
 // Change
 static void smenu_on_change(void* param) {
 
+    boolean s = (boolean)param;
+
+    if(s && stageTarget == stageIndex) {
+
+        ++ stageIndex;
+
+        // Save data
+        smenu_save_data();
+    }
+
     redrawBG = true;
     redrawMenu = true;
 }
@@ -337,3 +380,23 @@ void smenu_init_assets() {
     bmpSMenu = (Bitmap*)get_asset("smenu");
     bmpFont = (Bitmap*)get_asset("font");
 }
+
+
+// Load the save data
+boolean smenu_load_file() {
+
+    // Open the file & check if exists
+    FILE* f = fopen(FPATH, "rb");
+    if(f == NULL) {
+
+        return false;
+    }
+
+    // Read current stage index
+    fread(&stageIndex, sizeof(uint8), 1, f);
+
+    // Close
+    fclose(f);
+
+    return true;
+}   

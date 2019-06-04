@@ -90,7 +90,9 @@ static void cb_reset_stage() {
 }
 // Change scene callback
 static void cb_change() {
-    app_change_scene("smenu", NULL);
+
+    boolean state = stage->pl.gems == stage->pl.maxGems;
+    app_change_scene("smenu", (void*)state);
 }
 
 // Menu callbacks
