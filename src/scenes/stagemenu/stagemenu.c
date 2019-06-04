@@ -223,6 +223,14 @@ static void cb_goto_stage() {
     }
 }
 
+
+// Esc key cb
+static void cb_escape() {
+
+    app_change_scene("title", NULL);
+}
+
+
 // Update
 static void smenu_update(int16 steps) {
 
@@ -231,7 +239,7 @@ static void smenu_update(int16 steps) {
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
 
-        tr_activate(FadeIn, 2, app_terminate);
+        tr_activate(FadeIn, 2, cb_escape);
         return;
     }
 

@@ -31,7 +31,7 @@ static int16 timer;
 // Go to title
 static void cb_go_to_title() {
 
-    tr_activate(FadeOut, 1, NULL); // Just changes the speed
+   // tr_activate(FadeOut, 1, NULL); // Just changes the speed
     app_change_scene("title", (void*)1);
 }
 

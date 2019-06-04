@@ -13,6 +13,7 @@
 #include <stdbool.h>
 
 #include "err.h"
+#include "mathext.h"
 
 #define PALETTE_INCLUDED
 #include "palette.h"
@@ -447,25 +448,38 @@ void draw_bitmap_region_fast(Bitmap* bmp,
 void draw_text_fast(Bitmap* font, const char* text, 
     int16 dx, int16 dy, int16 xoff, int16 yoff, bool center) {
 
-    uint8 len = strlen((const char*)text);
+    uint16 len = strlen((const char*)text);
+    draw_substr_fast(font, text, dx, dy, xoff, yoff, 0, len, center);
+}
+
+
+// Draw substring fast
+void draw_substr_fast(Bitmap* font, const char* text, 
+    int16 dx, int16 dy, int16 xoff, int16 yoff, 
+    uint16 start, uint16 end,
+    bool center) {
+    
+    uint16 len = strlen((const char*)text);
 
     int16 x = dx;
     int16 y = dy;
     uint16 cw = font->width / 16;
     uint16 ch = cw;
-    int16 i;
+    uint16 i;
     uint8 c;
     int16 sx, sy;
+
+    end = min_int16(len, end);
 
     // Center
     if(center) {
 
-        dx -= (cw+xoff)*len/2;
+        dx -= (cw+xoff)*end/2;
         x = dx;
     }
 
     // Draw characters
-    for(i = 0; i < len; ++ i) {
+    for(i = 0; i < end; ++ i) {
 
         c = text[i];
 
@@ -477,12 +491,15 @@ void draw_text_fast(Bitmap* font, const char* text,
             continue;
         }
 
-        sx = c % 16;
-        sy = c / 16;
+        if(i >= start) {
 
-        // Draw char
-        draw_bitmap_region_fast(font, sx*cw, sy*ch, 
-            cw, ch, x, y);
+            sx = c % 16;
+            sy = c / 16;
+
+            // Draw char
+            draw_bitmap_region_fast(font, sx*cw, sy*ch, 
+                cw, ch, x, y);
+        }
 
         x += cw + xoff;
     }

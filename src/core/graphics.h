@@ -62,6 +62,12 @@ void draw_bitmap_region_fast(Bitmap* bmp,
 void draw_text_fast(Bitmap* font, const char* text, 
     int16 x, int16 y, int16 xoff, int16 yoff, bool center);
 
+// Draw a text substring fast
+void draw_substr_fast(Bitmap* font, const char* text, 
+    int16 dx, int16 dy, int16 xoff, int16 yoff, 
+    uint16 start, uint16 end,
+    bool center);
+
 // Draw a bitmap
 void draw_bitmap(Bitmap* bmp, int16 x, int16 y,
     bool flip);    

@@ -24,12 +24,13 @@
 static const char* TITLE_SCENE_NAME = "title";
 
 // Constants
-static int16 INITIAL_LOGO_TIME = 120;
+static int16 INITIAL_LOGO_TIME = 60;
 
 // Flags
 static boolean logoLoaded;
 static boolean logoDrawn;
 static boolean bgDrawn;
+static boolean storyPlayed;
 
 // Logo timer
 static int16 logoTimer;
@@ -46,6 +47,7 @@ static Bitmap* bmpSMenu;
 // Menu
 static Menu menu;
 
+
 // Start game
 static void start_game() {
 
@@ -60,10 +62,15 @@ static void start_game() {
         return;
     }
 
-    // Reinitialize
-    smenu_init_assets();
+    if(storyPlayed) {
 
-    app_change_scene("smenu", NULL);
+        // Reinitialize
+        smenu_init_assets();
+    }
+
+    // Go to the story scene
+    app_change_scene(storyPlayed ? "smenu" : "story", (void*)1);
+    storyPlayed = true;
 }
 
 // Callbacks
@@ -157,9 +164,6 @@ static int16 title_init() {
 
     // Create menu
     title_create_pause_menu();
-
-    // Set transition
-    tr_activate(FadeOut, 1, NULL);
 
     return 0;
 }
