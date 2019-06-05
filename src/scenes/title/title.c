@@ -24,7 +24,7 @@
 static const char* TITLE_SCENE_NAME = "title";
 
 // Constants
-static int16 INITIAL_LOGO_TIME = 60;
+static int16 INITIAL_LOGO_TIME = 30;
 
 // Flags
 static boolean logoLoaded;
@@ -46,6 +46,11 @@ static Bitmap* bmpSMenu;
 
 // Menu
 static Menu menu;
+
+// Confirm screen variables
+static boolean confirmActive;
+static boolean confirmCursor;
+static uint8 confirmChanged;
 
 
 // Start game
@@ -80,9 +85,22 @@ static void cb_start() {
 }
 static void cb_audio() {
 
+    // TEMP
+    char c = menu.text[1] [10];
+    if(c == 'F') {
+        menu.text[1] [9] = 'N';
+        menu.text[1] [10] = ' ';
+    }
+    else {
+        menu.text[1] [9] = 'F';
+        menu.text[1] [10] = 'F';
+    }
+    menu.redraw = true;
 }
 static void cb_clear() {
-
+    confirmActive = true;
+    confirmChanged = true;
+    confirmCursor = 1;
 }
 static void cb_quit() {
 
@@ -98,7 +116,7 @@ static void title_create_pause_menu() {
     
     // Add buttons
     menu_add_button(&menu, "START GAME", cb_start);
-    menu_add_button(&menu, "AUDIO: ON", cb_audio);
+    menu_add_button(&menu, "AUDIO: ON ", cb_audio);
     menu_add_button(&menu, "CLEAR DATA", cb_clear);
     menu_add_button(&menu, "QUIT GAME", cb_quit);
 }
@@ -139,6 +157,37 @@ static void title_draw_background() {
 }
 
 
+
+// Draw confirm screen
+static void title_draw_confirm_screen() {
+
+    const int16 WIDTH = 128;
+    const int16 HEIGHT = 24;
+
+    int16 x = 160-WIDTH/2;
+    int16 y = 100-HEIGHT/2;
+
+    if(confirmChanged) {
+
+        // Box
+        fill_rect(x-2, y-2, WIDTH+4, HEIGHT+4, 146);
+        fill_rect(x-1, y-1, WIDTH+2, HEIGHT+2, 255);
+        fill_rect(x, y, WIDTH, HEIGHT, 0);
+
+        // Header
+        draw_text_fast(bmpFont, "ARE YOU SURE?", 
+            x+WIDTH/2, y+2, 0, 0, true);
+
+        confirmChanged = false;
+    }   
+
+     // Yes/no
+    draw_text_fast(bmpFont,
+        confirmCursor == 0 ?  "\6YES    NO" : " YES   \6NO", 
+        x+WIDTH/2, y+HEIGHT/2, 0, 0, true);
+}
+
+
 // Initialize
 static int16 title_init() {
 
@@ -161,6 +210,9 @@ static int16 title_init() {
     enterTimer = 59;
     phase = 0;
     logoTimer = INITIAL_LOGO_TIME;
+    confirmActive = false;
+    confirmChanged = false;
+    confirmCursor = 1;
 
     // Check if a save file exists
     storyPlayed = smenu_load_file();
@@ -177,6 +229,35 @@ static void title_update(int16 steps) {
 
     const int16 LOGO_SPEED = 2;
 
+    // Confirm menu
+    if(confirmActive) {
+
+        // Update cursor
+        if(input_get_arrow_key(ArrowLeft) == StatePressed ||
+           input_get_arrow_key(ArrowRight) == StatePressed) {
+
+            confirmCursor = !confirmCursor;
+        }
+
+        // Check enter
+        if(input_get_button(2) == StatePressed) {
+
+            if(confirmCursor == 0) {
+
+                smenu_clear_progress();
+                storyPlayed = false;
+            }
+            
+            confirmActive = false;
+
+            bgDrawn = false;
+            menu.redraw = true;
+            logoDrawn = false;
+        }
+
+        return;
+    }
+
     // Quit
     if(input_get_button(3) == StatePressed) {
 
@@ -188,14 +269,21 @@ static void title_update(int16 steps) {
 
         // Update logo timer
         logoTimer -= LOGO_SPEED * steps;
-        if(logoTimer < 0)
+        if(logoTimer < 0) {
+
             logoTimer = 0;
+            logoDrawn = false;
+        }
 
         return;
     }
     else {
 
-        logoTimer = 0;
+        if(logoTimer > 0) {
+
+            logoTimer = 0;
+            logoDrawn = false;
+        }
     }
 
     if(phase == 0) {
@@ -270,6 +358,12 @@ static void title_draw() {
 
         // Draw menu
         menu_draw(&menu, 160, MENU_Y);
+    }
+
+    // Draw confirm box
+    if(confirmActive) {
+
+        title_draw_confirm_screen();
     }
 }
 

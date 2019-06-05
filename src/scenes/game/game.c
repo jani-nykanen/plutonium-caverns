@@ -108,7 +108,20 @@ static void cb_reset() {
     tr_activate(FadeIn, 2, cb_reset_stage);
     
 }
-static void cb_audio() {}
+static void cb_audio() {
+
+    // TEMP
+    char c = pauseMenu.text[2] [10];
+    if(c == 'F') {
+        pauseMenu.text[2] [9] = 'N';
+        pauseMenu.text[2] [10] = ' ';
+    }
+    else {
+        pauseMenu.text[2] [9] = 'F';
+        pauseMenu.text[2] [10] = 'F';
+    }
+    pauseMenu.redraw = true;
+}
 static void cb_quit() {
     pauseMenu.active = false;
     stage_redraw(stage);
@@ -123,7 +136,7 @@ static void game_create_pause_menu() {
     // Add buttons
     menu_add_button(&pauseMenu, "RESUME", cb_resume);
     menu_add_button(&pauseMenu, "RESTART", cb_reset);
-    menu_add_button(&pauseMenu, "AUDIO: ON", cb_audio);
+    menu_add_button(&pauseMenu, "AUDIO: ON ", cb_audio);
     menu_add_button(&pauseMenu, "QUIT", cb_quit);
 }
 

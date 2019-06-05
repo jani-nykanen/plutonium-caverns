@@ -400,3 +400,17 @@ boolean smenu_load_file() {
 
     return true;
 }   
+
+
+// Clear progress
+void smenu_clear_progress() {
+
+    // Remove file
+    remove(FPATH);
+
+    // Reset values
+    stageIndex = 1;
+    stageTarget = 1;
+    cpos.x = 0;
+    cpos.y = 1;
+}

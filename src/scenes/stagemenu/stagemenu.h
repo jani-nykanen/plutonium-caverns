@@ -15,4 +15,7 @@ void smenu_init_assets();
 // Load the save data
 boolean smenu_load_file();
 
+// Clear progress
+void smenu_clear_progress();
+
 #endif // __STAGE_MENU__
