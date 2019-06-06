@@ -18,8 +18,7 @@ typedef struct {
     int8 cpos;
     uint8 escAction;
     uint8 buttonCount;
-    // Button info (no need to add an own
-    // struct for these, really)
+    // TODO: Put inside a struct, please...
     void (*cbs [MAX_BUTTON_COUNT])(void);
     char text[MAX_BUTTON_COUNT] [BUTTON_NAME_LENGTH];
 

@@ -7,6 +7,7 @@
 #include "core/assets.h"
 #include "core/input.h"
 #include "core/mathext.h"
+#include "core/audio.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -67,6 +68,8 @@ void menu_update(Menu* m, int16 steps) {
     if(input_get_button(2) == StatePressed) {
 
         m->cbs[m->cpos]();
+
+        audio_play(S_BEEP3);
     }
 
     // Check cursor movement
@@ -79,6 +82,7 @@ void menu_update(Menu* m, int16 steps) {
     if(m->cpos != opos) {
 
         m->redraw = true;
+        audio_play(S_BEEP2);
     }
 }
 

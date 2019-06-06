@@ -9,6 +9,7 @@
 #include "input.h"
 #include "assets.h"
 #include "transition.h"
+#include "audio.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,6 +62,7 @@ int16 init_application() {
     init_input();
     init_assets();
     init_transition();
+    init_audio();
 
     // Set defaults params
     frameSkip = 1;
@@ -139,10 +141,11 @@ void app_run() {
             if(activeScene->update != NULL) {
 
                 activeScene->update(frameSkip +1);
-
-                // Update transition
-                tr_update(frameSkip +1);
             }
+            // Update transition
+            tr_update(frameSkip +1);
+            // Update audio
+            audio_update(frameSkip +1);
 
             // Draw
             if(activeScene->draw != NULL) {

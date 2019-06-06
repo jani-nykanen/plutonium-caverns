@@ -13,6 +13,7 @@
 #include "../../core/assets.h"
 #include "../../core/transition.h"
 #include "../../core/err.h"
+#include "../../core/audio.h"
 
 #include "../../menu.h"
 
@@ -110,9 +111,10 @@ static void cb_reset() {
 }
 static void cb_audio() {
 
-    // TEMP
-    char c = pauseMenu.text[2] [10];
-    if(c == 'F') {
+    // Toggle audio & change the text
+    boolean audioEnabled = audio_enabled();
+    audio_toggle();
+    if(!audioEnabled) {
         pauseMenu.text[2] [9] = 'N';
         pauseMenu.text[2] [10] = ' ';
     }
@@ -296,6 +298,10 @@ static void game_on_change(void* param) {
     stageClear = false;
 
     stageIndex = (uint8)param;
+
+    // Set audio button text
+    audio_toggle();
+    cb_audio();
 }
 
 

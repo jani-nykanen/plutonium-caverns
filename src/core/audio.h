@@ -1,0 +1,33 @@
+// Simple audio player
+// (c) 2019 Jani Nykänen
+
+#ifndef __AUDIO__
+#define __AUDIO__
+
+#include "types.h"
+
+// Sounds
+enum {
+
+    S_BEEP1 = 0,
+    S_BEEP2 = 1,
+    S_BEEP3 = 2,
+    S_BEEP4 = 3,
+};
+
+// Initialize
+void init_audio();
+
+// Play sound
+void audio_play(uint8 sound);
+
+// Update audio
+void audio_update(int16 steps);
+
+// Toggle audio
+void audio_toggle();
+
+// Is audio enabled
+boolean audio_enabled();
+
+#endif // __AUDIO__

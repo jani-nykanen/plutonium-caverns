@@ -14,6 +14,7 @@
 #include "../../core/assets.h"
 #include "../../core/transition.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include "../../menu.h"
 
@@ -85,9 +86,10 @@ static void cb_start() {
 }
 static void cb_audio() {
 
-    // TEMP
-    char c = menu.text[1] [10];
-    if(c == 'F') {
+    // Toggle audio & change the text
+    boolean audioEnabled = audio_enabled();
+    audio_toggle();
+    if(!audioEnabled) {
         menu.text[1] [9] = 'N';
         menu.text[1] [10] = ' ';
     }
@@ -237,6 +239,7 @@ static void title_update(int16 steps) {
            input_get_arrow_key(ArrowRight) == StatePressed) {
 
             confirmCursor = !confirmCursor;
+            audio_play(S_BEEP2);
         }
 
         // Check enter
@@ -246,6 +249,11 @@ static void title_update(int16 steps) {
 
                 smenu_clear_progress();
                 storyPlayed = false;
+
+                audio_play(S_BEEP3);
+            }
+            else {
+                audio_play(S_BEEP4);
             }
             
             confirmActive = false;
@@ -261,6 +269,7 @@ static void title_update(int16 steps) {
     // Quit
     if(input_get_button(3) == StatePressed) {
 
+        audio_play(S_BEEP4);
         tr_activate(FadeIn, 2, app_terminate);
         return;
     }
@@ -300,6 +309,8 @@ static void title_update(int16 steps) {
 
             ++ phase;
             menu_activate(&menu, 0);
+
+            audio_play(S_BEEP1);
         }
 
     }
@@ -398,6 +409,10 @@ static void title_on_change(void* param) {
     bgDrawn = false;
 
     menu.redraw = true;
+
+    // Set audio button text
+    audio_toggle();
+    cb_audio();
 }
 
 
