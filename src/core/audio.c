@@ -53,6 +53,14 @@ void audio_play(uint8 s) {
     SOUND(BEEP2);
     SOUND(BEEP3);
     SOUND(BEEP4);
+    SOUND(BEEP5);
+    SOUND(BREAK);
+    SOUND(MOVE);
+    SOUND(ACTIVATE);
+    SOUND(DISAPPEAR);
+    SOUND(ITEM);
+    SOUND(VICTORY);
+    SOUND(EXPLOSION);
     default:
         break;
     }
@@ -89,7 +97,9 @@ void audio_update(int16 steps) {
         }
 
         // Play the next sound
-        sound((uint16)audioBuffer[audioPointer *2]);
+        if(audioBuffer[audioPointer *2] > 0)
+            sound((uint16)audioBuffer[audioPointer *2]);
+        // Store length
         audioLength = (uint16)audioBuffer[audioPointer *2 +1];
     }
 }

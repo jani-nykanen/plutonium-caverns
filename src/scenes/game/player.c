@@ -9,6 +9,7 @@
 #include "../../core/sprite.h"
 #include "../../core/input.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include "stage.h"
 

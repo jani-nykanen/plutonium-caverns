@@ -14,6 +14,7 @@
 #include "../../core/assets.h"
 #include "../../core/transition.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include "../game/game.h"
 
@@ -271,6 +272,8 @@ static void smenu_update(int16 steps) {
     // Quit (TEMPORARY!)
     if(input_get_button(3) == StatePressed) {
 
+        audio_play(S_BEEP4);
+
         tr_activate(FadeIn, 2, cb_escape);
         return;
     }
@@ -280,6 +283,8 @@ static void smenu_update(int16 steps) {
     // Enter pressed
     if(input_get_button(2) == StatePressed &&
        stageTarget <= stageIndex) {
+
+        audio_play(S_BEEP3);
 
         tr_activate(FadeIn, 2, cb_goto_stage);
         return;
@@ -311,6 +316,8 @@ static void smenu_update(int16 steps) {
 
         smenu_compute_pcursor_pos();
         fillOldCursorPos = true;
+
+        audio_play(S_BEEP2);
     }
 }
 

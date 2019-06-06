@@ -7,6 +7,7 @@
 #include "../../core/graphics.h"
 #include "../../core/assets.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -830,6 +831,9 @@ void stage_item_collision(Player* pl, Stage* s) {
 
         s->data[pl->pos.y*s->width+pl->pos.x] = 0;
         game_redraw_info(&s->pl);
+
+         // Play sound
+        audio_play(S_ITEM);
     }
 }
 
@@ -883,6 +887,9 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
         stage_draw_static(s, 1, 1, s->width-2, s->height-2, 
             s->topLeft.x, s->topLeft.y, 0);
+
+        // Sound
+        audio_play(S_BEEP2);
     
         break;
         
@@ -895,6 +902,9 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             -- pl->keys;
             game_redraw_info(pl);
+
+            // Sound
+            audio_play(S_ACTIVATE);
 
             return true;
         }
@@ -914,6 +924,9 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
 
             s->animFrame = 0;
 
+            // Play sound
+            audio_play(S_BREAK);
+
             return true;
         }
         break;
@@ -930,6 +943,9 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             game_redraw_info(pl);
 
             s->animFrame = 3;
+
+            // Play sound
+            audio_play(S_BREAK);
 
             return true;
         }
@@ -949,6 +965,9 @@ boolean stage_activate_tile(Player* pl, uint8 tx, uint8 ty, Stage* s) {
             -- pl->bombs;
             
             game_redraw_info(pl);
+
+            // Sound
+            audio_play(S_ACTIVATE);
 
             return true;
         }

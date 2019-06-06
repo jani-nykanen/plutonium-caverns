@@ -7,6 +7,7 @@
 #include "../../core/graphics.h"
 #include "../../core/assets.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include <stdio.h>
 
@@ -66,6 +67,9 @@ static void boulder_move(Boulder* b, Player* pl, Stage* s, int16 steps) {
 
                     // Update solid data
                     stage_update_solid(s, b->pos.x, b->pos.y, 0);
+
+                    // Play sound
+                    audio_play(S_MOVE);
                 }
             }
         }
@@ -94,6 +98,9 @@ static void boulder_update_bomb(Boulder* b, Player* pl,
 
         b->redraw = true;
         -- b->bombTimer;
+
+        // Play sound
+        audio_play(S_BEEP5);
     }
     // Detonate
     if(b->bombTimer <= 0 && !pl->moving) {
@@ -101,6 +108,10 @@ static void boulder_update_bomb(Boulder* b, Player* pl,
         b->exist = false;
         // Detonate
         stage_detonate(s, b->pos.x, b->pos.y);
+
+        // Play sound
+        audio_play(S_EXPLOSION);
+
         return;
     }
 
@@ -126,6 +137,9 @@ static void boulder_check_collision(Boulder* b, Player* pl,
             // Remove lava
             stage_update_tile(s, b->pos.x, b->pos.y, 0);
             stage_update_solid(s, b->pos.x, b->pos.y, 0);
+
+            // Play sound
+            audio_play(S_DISAPPEAR);
 
             // Stop existing
             b->exist = false;

@@ -15,6 +15,7 @@
 #include "../../core/assets.h"
 #include "../../core/transition.h"
 #include "../../core/mathext.h"
+#include "../../core/audio.h"
 
 #include "../stagemenu/stagemenu.h"
 
@@ -43,15 +44,11 @@ static uint16 len;
 // Story textes
 static const char* STORY[] = { 
 "YOU ARE AN ALIEN SPACE TRAVELER, FAR\n"
-"AWAY FROM HOME. YOU WERE EXPLORING A\n"
-"MYSTERIOUS DWARF PLANET NAMED \"PLUTO\".\n"
-"SUDDENLY YOUR SHIP RAN OUT OF FUEL AND\n"
-"YOU HAD TO LAND THE SURFACE OF THIS\n"
-"COLD PLANET. TO GET YOUR SHIP WORKING\n"
-"AGAIN, YOU MUST EXPLORE THE DARK\n"
-"CAVERNS OF PLUTO AND TRY TO FIND\n"
-"ENOUGH PLUTONIUM GEMS TO FUEL YOUR\n"
-"SHIP AND RETURN TO YOUR HOME PLANET."
+"AWAY FROM HOME. YOU HAVE STRANDED A\n"
+"A MYSTERIOUS PLANET. YOU MUST EXPLORE\n"
+"DARK CAVERNS AND COLLECT PLUTONIUM\n"
+"GEMS TO FUEL UP YOUR SHIP AND ESCAPE\n"
+"THIS TERRIBLE PLANET."
 ,
 "WITH THE POWER OF PLUTONIUM\n"
 "YOU FUEL YOU SHIP AND ESCAPE THIS\n"
@@ -103,6 +100,9 @@ static void story_update(int16 steps) {
        input_get_button(3) == StatePressed) {
 
         tr_activate(FadeIn, 2, cb_go_to_stage);
+
+        // Sound
+        audio_play(S_BEEP3);
     }
 
     // Update char timer

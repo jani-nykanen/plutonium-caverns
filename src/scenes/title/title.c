@@ -416,7 +416,6 @@ static void title_on_change(void* param) {
 }
 
 
-
 // Get title menu scene
 Scene title_get_scene() {
 

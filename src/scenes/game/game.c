@@ -206,6 +206,10 @@ static void game_update(int16 steps) {
             input_get_button(3) == StatePressed) {
 
         menu_activate(&pauseMenu, 0);
+
+        // Sound
+        audio_play(S_BEEP1);
+
         return;
     }
 
@@ -213,6 +217,8 @@ static void game_update(int16 steps) {
     if(input_get_button(1) == StatePressed) {
 
         tr_activate(FadeIn, 2, cb_reset_stage);
+        audio_play(S_BEEP1);
+
         return;
     }
 
@@ -225,6 +231,9 @@ static void game_update(int16 steps) {
         stageClear = true;
         redrawClear = true;
         clearTimer = CLEAR_TIME;
+
+        // Sound
+        audio_play(S_VICTORY);
     }
 
     // Check if the game is beaten

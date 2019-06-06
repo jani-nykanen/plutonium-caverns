@@ -13,6 +13,14 @@ enum {
     S_BEEP2 = 1,
     S_BEEP3 = 2,
     S_BEEP4 = 3,
+    S_BEEP5 = 4,
+    S_BREAK = 5,
+    S_MOVE = 6,
+    S_ACTIVATE = 7,
+    S_DISAPPEAR = 8,
+    S_ITEM = 9,
+    S_VICTORY = 10,
+    S_EXPLOSION = 11,
 };
 
 // Initialize

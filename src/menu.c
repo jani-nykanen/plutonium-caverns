@@ -61,6 +61,10 @@ void menu_update(Menu* m, int16 steps) {
     if(input_get_button(3) == StatePressed) {
 
         m->cbs[m->escAction] ();
+
+        // Sound
+        audio_play(S_BEEP4);
+
         return;
     }
 
