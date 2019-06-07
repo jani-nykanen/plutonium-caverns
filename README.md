@@ -1,10 +1,17 @@
-## Plutonium Caverns
+![](https://img.itch.zone/aW1nLzIxNzc4MzEucG5n/original/I3XtCM.png)
 
 **Plutonium Caverns** is a puzzle game for MS-DOS. For reasons.
 
 ------
 
-## Builing
+## Playing
+
+[Play here](https://jani-nykanen.itch.io/plutonium-caverns?secret=MfrVdEN0ge3wRhvQt9So5OXWLR8)
+(Currently secret game page, can only be reached with this link)
+
+------
+
+## Building
 
 OpenWatcom required. Put all the .c files to the project and build.
 

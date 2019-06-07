@@ -2,7 +2,7 @@
 let canvas = document.getElementById("canvas");
 
 const W = 320;
-const H = 240;
+const H = 200;
 
 
 // Resize function
