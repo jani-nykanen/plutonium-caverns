@@ -7,15 +7,15 @@
 
 // Beep 1
 static const int16 BEEP1[] = {
-    150, 20, -1,
+    125, 20, -1,
 };
 // Beep 2
 static const int16 BEEP2[] = {
-    200, 10, -1,
+    200, 8, -1,
 };
 // Beep 3
 static const int16 BEEP3[] = {
-    175, 15, -1,
+    150, 15, -1,
 };
 // Beep 4
 static const int16 BEEP4[] = {
