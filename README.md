@@ -6,8 +6,9 @@
 
 ## Playing
 
-[Play here](https://jani-nykanen.itch.io/plutonium-caverns?secret=MfrVdEN0ge3wRhvQt9So5OXWLR8)
-(Currently secret game page, can only be reached with this link)
+[Play on itch.io](https://jani-nykanen.itch.io/plutonium-caverns?secret=MfrVdEN0ge3wRhvQt9So5OXWLR8)
+or
+[Play on Game Jolt](https://gamejolt.com/games/plutonium-caverns/418207)
 
 ------
 
